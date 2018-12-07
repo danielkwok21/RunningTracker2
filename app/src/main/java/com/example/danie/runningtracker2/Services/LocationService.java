@@ -12,6 +12,11 @@ import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.example.danie.runningtracker2.Activities.Tracking;
+import com.example.danie.runningtracker2.Track;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 public class LocationService extends Service {
     private static final String TAG = "LocationService";
     public static final String START_LOCATION = "startLocation";
@@ -19,6 +24,7 @@ public class LocationService extends Service {
     public static final String DISTANCE = "distance";
     public final String METER = "m";
     public final String KILOMETER = "km";
+    public static final String TRACK = "newTrack";
 
 
     private IBinder locationServiceBinder;
@@ -57,10 +63,11 @@ public class LocationService extends Service {
             Location currentLocation;
             Location prevLocation;
             Location startLocation;
-            float calcDistance=0;
-
-            boolean converted = false;
+            double calcDistance=0;
             String unit = METER;
+
+            Track newTrack;
+            Gson gson = new Gson();
 
             @Override
             public void onLocationChanged(Location location) {
@@ -77,10 +84,9 @@ public class LocationService extends Service {
 
                 Log.d(TAG, "calcDistance: "+calcDistance);
                 //converts to km if distance is above 1000m
-                if(calcDistance>1000 && !converted){
+                if(calcDistance>1000 && unit.equals(METER)){
                     calcDistance/=1000;
                     unit = KILOMETER;
-                    converted=true;
                 }
 
                 prevLocation = location;
@@ -88,6 +94,16 @@ public class LocationService extends Service {
                 Log.d(TAG, "onLocationChanged: startLocation: "+startLocation);
                 Log.d(TAG, "onLocationChanged: currentLocation: "+currentLocation);
                 Log.d(TAG, "onLocationChanged: calcDistance: "+calcDistance);
+
+
+                //creating new track object
+                newTrack = new Track(gson.toJson(startLocation), gson.toJson(currentLocation), calcDistance, unit);
+
+                //broadcasts info
+                broadcastIntent = new Intent();
+                broadcastIntent.setAction(Tracking.BROADCAST_ACTION);
+                broadcastIntent.putExtra(TRACK, gson.toJson(newTrack));
+                sendBroadcast(broadcastIntent);
             }
 
             @Override
