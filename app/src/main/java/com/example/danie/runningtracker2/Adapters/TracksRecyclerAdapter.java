@@ -41,7 +41,7 @@ public class TracksRecyclerAdapter extends RecyclerView.Adapter<TracksRecyclerAd
 
     @Override
     public void onBindViewHolder(@NonNull TrackViewHolder trackViewHolder, int i) {
-        trackViewHolder.tv.setText(tracks.get(i).getId());
+        trackViewHolder.tv.setText(tracks.get(i).getName());
         trackViewHolder.thisTrack = tracks.get(i);
     }
 

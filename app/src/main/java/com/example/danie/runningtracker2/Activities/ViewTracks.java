@@ -64,6 +64,10 @@ public class ViewTracks extends AppCompatActivity {
         }
         Log.d(TAG, "getTracksFromProvider: Track size:"+tracks.size());
 
+        if(c!=null){
+            c.close();
+        }
+
         return tracks;
     }
 
