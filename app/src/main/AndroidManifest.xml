@@ -28,8 +28,13 @@
             android:enabled="true"
             android:exported="true" />
 
-        <receiver android:name=".Activities.Tracking$LocationReceiver"/>
+        <receiver android:name=".Activities.Tracking$LocationReceiver" />
 
+        <provider
+            android:name=".ContentProviders.TracksProvider"
+            android:authorities="com.example.danie.runningtracker2.ContentProviders.TracksProvider"
+            android:enabled="true"
+            android:exported="true"></provider>
     </application>
 
 </manifest>

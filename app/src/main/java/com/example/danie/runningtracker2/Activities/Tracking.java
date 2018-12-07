@@ -2,6 +2,7 @@ package com.example.danie.runningtracker2.Activities;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -17,6 +18,7 @@ import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.TextView;
 
+import com.example.danie.runningtracker2.ContentProviders.TracksProvider;
 import com.example.danie.runningtracker2.R;
 import com.example.danie.runningtracker2.Services.LocationService;
 import com.example.danie.runningtracker2.Track;
@@ -40,7 +42,6 @@ public class Tracking extends AppCompatActivity {
 
     boolean serviceRunning = false;
     Track newTrack;
-    List<Track> tracks = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +82,7 @@ public class Tracking extends AppCompatActivity {
 
                 stopWatch.stop();
 
-                tracks.add(newTrack);
+                uploadToDB(newTrack);
 
                 serviceRunning = false;
             }
@@ -90,6 +91,30 @@ public class Tracking extends AppCompatActivity {
         start.performClick();
     }
 
+    private boolean uploadToDB(Track track){
+        ContentValues values = new ContentValues();
+
+        try{
+            String startLocation = track.getStartLocation();
+            String endLocation = track.getEndLocation();
+            String distance = Double.toString(track.getDistance());
+            String unit = track.getUnit();
+            String duration = Long.toString(track.getDuration());
+
+            values.put(TracksProvider.START_LOCATION, startLocation);
+            values.put(TracksProvider.END_LOCATION, endLocation);
+            values.put(TracksProvider.DISTANCE, distance);
+            values.put(TracksProvider.DURATION, duration);
+            values.put(TracksProvider.UNIT, unit);
+
+            getContentResolver().insert(TracksProvider.CONTENT_URI, values);
+
+            return true;
+        }catch(Exception e){
+            Log.d(TAG, "uploadToDB: "+e);
+            return false;
+        }
+    }
 
     public class LocationReceiver extends BroadcastReceiver {
         Gson gson = new Gson();
