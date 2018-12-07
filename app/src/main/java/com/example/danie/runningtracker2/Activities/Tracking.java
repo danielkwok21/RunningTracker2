@@ -42,6 +42,7 @@ public class Tracking extends AppCompatActivity {
 
     boolean serviceRunning = false;
     Track newTrack;
+    Gson gson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,21 +94,10 @@ public class Tracking extends AppCompatActivity {
 
     private boolean uploadToDB(Track track){
         ContentValues values = new ContentValues();
-
+        gson = new Gson();
         try{
-            String startLocation = track.getStartLocation();
-            String endLocation = track.getEndLocation();
-            String distance = Double.toString(track.getDistance());
-            String unit = track.getUnit();
-            String duration = Long.toString(track.getDuration());
-
-            values.put(TracksProvider.START_LOCATION, startLocation);
-            values.put(TracksProvider.END_LOCATION, endLocation);
-            values.put(TracksProvider.DISTANCE, distance);
-            values.put(TracksProvider.DURATION, duration);
-            values.put(TracksProvider.UNIT, unit);
-
-            getContentResolver().insert(TracksProvider.CONTENT_URI, values);
+            values.put(TracksProvider.JSON_OBJECT, gson.toJson(track));
+            getContentResolver().insert(TracksProvider.CONTENT_URL, values);
 
             return true;
         }catch(Exception e){
@@ -121,7 +111,6 @@ public class Tracking extends AppCompatActivity {
         Double distance;
         String unit;
 
-
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "onReceive: "+intent.getAction());
@@ -134,25 +123,10 @@ public class Tracking extends AppCompatActivity {
                 distance= newTrack.getDistance();
                 unit = newTrack.getUnit();
                 Tracking.distance.setText(String.format("%.2f", distance)+unit);
-
-
             }else{
                 Log.d(TAG, "onReceive: Error");
             }
         }
-    }
-
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        registerReceiver(locationReceiver, filter);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        unregisterReceiver(locationReceiver);
     }
 
     private boolean checkPermissions() {

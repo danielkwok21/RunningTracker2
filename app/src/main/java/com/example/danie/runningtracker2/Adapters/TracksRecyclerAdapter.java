@@ -54,14 +54,14 @@ public class TracksRecyclerAdapter extends RecyclerView.Adapter<TracksRecyclerAd
 
         TextView tv;
         Track thisTrack;
-        Gson gsonBuilder = new GsonBuilder().create();
+        Gson gson = new Gson();
 
         TrackViewHolder(Context c, View v) {
             super(v);
             tv = v.findViewById(R.id.recyclerview_log_name);
             tv.setOnClickListener((tv)->{
                 Intent i = new Intent(c, ViewTrackDetailed.class);
-                String jsonObject = gsonBuilder.toJson(thisTrack);
+                String jsonObject = gson.toJson(thisTrack);
 
                 i.putExtra(JSON_OBJECT, jsonObject);
                 c.startActivity(i);

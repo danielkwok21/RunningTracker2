@@ -21,6 +21,7 @@ public class ViewTrackDetailed extends AppCompatActivity {
     TextView duration;
 
     Track track;
+    Gson gson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +31,7 @@ public class ViewTrackDetailed extends AppCompatActivity {
         if(savedInstanceState==null){
             Bundle extras = getIntent().getExtras();
             String jsonObject;
-            Gson gson = new Gson();
+            gson = new Gson();
 
             if(extras!=null){
                 jsonObject = extras.getString(TracksRecyclerAdapter.JSON_OBJECT);
@@ -40,7 +41,7 @@ public class ViewTrackDetailed extends AppCompatActivity {
 
         initComponent();
 
-        Log.d(TAG, "Track: "+track.toString()   );
+        Log.d(TAG, "Track: "+track.toString());
     }
 
 
@@ -51,6 +52,5 @@ public class ViewTrackDetailed extends AppCompatActivity {
         endTime = findViewById(R.id.log_detailed_endtime_tv);
         distance = findViewById(R.id.log_detailed_distance);
         duration = findViewById(R.id.log_detailed_duration);
-
     }
 }

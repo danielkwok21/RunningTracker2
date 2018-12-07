@@ -1,15 +1,17 @@
 package com.example.danie.runningtracker2;
 
 
+import android.location.Location;
+
 public class Track {
     private static int id = 0;
-    private String startLocation;
-    private String endLocation;
+    private Location startLocation;
+    private Location endLocation;
     private double distance;
     private String unit;
     private long duration =0;
 
-    public Track(String startLocation, String endLocation, double distance, String unit, long duration){
+    public Track(Location startLocation, Location endLocation, double distance, String unit, long duration){
         this.id = id++;
         this.startLocation = startLocation;
         this.endLocation = endLocation;
@@ -18,7 +20,7 @@ public class Track {
         this.duration = duration;
     }
 
-    public Track(String startLocation, String endLocation, double distance, String unit){
+    public Track(Location startLocation, Location endLocation, double distance, String unit){
         this.id = id++;
         this.startLocation = startLocation;
         this.endLocation = endLocation;
@@ -30,11 +32,11 @@ public class Track {
         return id;
     }
 
-    public String getStartLocation() {
+    public Location getStartLocation() {
         return startLocation;
     }
 
-    public String getEndLocation() {
+    public Location getEndLocation() {
         return endLocation;
     }
 

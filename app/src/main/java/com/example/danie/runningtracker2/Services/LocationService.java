@@ -95,9 +95,8 @@ public class LocationService extends Service {
                 Log.d(TAG, "onLocationChanged: currentLocation: "+currentLocation);
                 Log.d(TAG, "onLocationChanged: calcDistance: "+calcDistance);
 
-
                 //creating new track object
-                newTrack = new Track(gson.toJson(startLocation), gson.toJson(currentLocation), calcDistance, unit);
+                newTrack = new Track(startLocation, currentLocation, calcDistance, unit);
 
                 //broadcasts info
                 broadcastIntent = new Intent();
@@ -124,10 +123,13 @@ public class LocationService extends Service {
                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(i);
             }
-
         };
 
         locationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (location != null) {
+            locationListener.onLocationChanged(location);
+        }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
     }
 

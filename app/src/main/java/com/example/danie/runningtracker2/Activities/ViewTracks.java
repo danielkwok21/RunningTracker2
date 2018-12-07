@@ -14,6 +14,7 @@ import com.example.danie.runningtracker2.Adapters.TracksRecyclerAdapter;
 import com.example.danie.runningtracker2.ContentProviders.TracksProvider;
 import com.example.danie.runningtracker2.R;
 import com.example.danie.runningtracker2.Track;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ public class ViewTracks extends AppCompatActivity {
     TracksRecyclerAdapter tracksRecyclerAdapter;
     ContentResolver contentResolver;
 
+    Gson gson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,23 +42,18 @@ public class ViewTracks extends AppCompatActivity {
 
     private List<Track> getTracksFromProvider(){
         Log.d(TAG, "getTracksFromProvider: ");
-
-        Uri uri = TracksProvider.CONTENT_URI;
-
+        Uri uri = TracksProvider.CONTENT_URL;
         Cursor c = contentResolver.query(uri, null, null, null, TracksProvider.ID);
         Track track;
+
         List<Track> tracks = new ArrayList<>();
+        gson = new Gson();
 
         if(c!=null){
             if(c.moveToFirst()){
                 do{
-                    String startLocation = c.getString(c.getColumnIndex(TracksProvider.START_LOCATION));
-                    String endLocation = c.getString(c.getColumnIndex(TracksProvider.END_LOCATION));
-                    Double distance = c.getDouble(c.getColumnIndex(TracksProvider.DISTANCE));
-                    String unit = c.getString(c.getColumnIndex(TracksProvider.UNIT));
-                    long duration = c.getLong(c.getColumnIndex(TracksProvider.DURATION));
-
-                    track = new Track(startLocation, endLocation, distance, unit, duration);
+                    String json = c.getString(c.getColumnIndex(TracksProvider.JSON_OBJECT));
+                    track = gson.fromJson(json, Track.class);
                     tracks.add(track);
                 }while(c.moveToNext());
             }else{
