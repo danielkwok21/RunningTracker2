@@ -7,13 +7,12 @@ public class Track {
     private String endLocation;
     private double distance;
     private String unit;
-    private Float duration;
+    private long duration =0;
 
-    public Track(String startLocation, String endLocation, double distance, String unit, Float duration){
+    public Track(String startLocation, String endLocation, double distance, String unit, long duration){
         this.id = id++;
         this.startLocation = startLocation;
         this.endLocation = endLocation;
-
         this.distance = distance;
         this.unit = unit;
         this.duration = duration;
@@ -47,7 +46,11 @@ public class Track {
         return unit;
     }
 
-    public Float getDuration() {
+    public long getDuration() {
         return duration;
+    }
+
+    public void setDuration(long duration) {
+        this.duration = duration;
     }
 }
