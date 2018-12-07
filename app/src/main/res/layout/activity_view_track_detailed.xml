@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.danie.runningtracker.Activities.ViewTracks">
+
+
+    <TextView
+        android:id="@+id/log_detailed_startdate_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="32dp"
+        android:text="StartDate"
+        android:textSize="30dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/log_detailed_enddate_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="60dp"
+        android:text="EndDate"
+        android:textSize="30dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/log_detailed_startdate_tv" />
+
+    <TextView
+        android:id="@+id/log_detailed_starttime_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="StartTime"
+        app:layout_constraintEnd_toEndOf="@+id/log_detailed_startdate_tv"
+        app:layout_constraintStart_toStartOf="@+id/log_detailed_startdate_tv"
+        app:layout_constraintTop_toBottomOf="@+id/log_detailed_startdate_tv" />
+
+    <TextView
+        android:id="@+id/log_detailed_endtime_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="EndTime"
+        app:layout_constraintEnd_toEndOf="@+id/log_detailed_enddate_tv"
+        app:layout_constraintStart_toStartOf="@+id/log_detailed_enddate_tv"
+        app:layout_constraintTop_toBottomOf="@+id/log_detailed_enddate_tv" />
+
+    <TextView
+        android:id="@+id/log_detailed_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="12dp"
+        android:text="distance"
+        app:layout_constraintBottom_toTopOf="@+id/log_detailed_duration"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/log_detailed_duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="56dp"
+        android:text="duration"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+</android.support.constraint.ConstraintLayout>
