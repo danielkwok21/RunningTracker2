@@ -23,11 +23,17 @@ import com.example.danie.runningtracker2.R;
 import com.example.danie.runningtracker2.Services.LocationService;
 import com.example.danie.runningtracker2.Track;
 import com.example.danie.runningtracker2.Util;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 
 import java.util.Calendar;
 
-public class Tracking extends AppCompatActivity {
+public class Tracking extends AppCompatActivity  implements OnMapReadyCallback{
     private static final String TAG = "Tracking";
     public static final String BROADCAST_ACTION = "GET_LOCATION";
 
@@ -38,6 +44,8 @@ public class Tracking extends AppCompatActivity {
     static TextView distance;
     static Chronometer stopWatch;
     static Button start;
+    SupportMapFragment mapFragment;
+    GoogleMap mMap;
 
     boolean serviceRunning = false;
     Track newTrack;
@@ -63,6 +71,9 @@ public class Tracking extends AppCompatActivity {
         distance = findViewById(R.id.tracking_distance_tv);
         stopWatch = findViewById(R.id.tracking_duration_chr);
         start = findViewById(R.id.tracking_start_btn);
+        mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
         start.setOnClickListener((v)->{
             if (!serviceRunning) {
@@ -87,9 +98,21 @@ public class Tracking extends AppCompatActivity {
                 serviceRunning = false;
             }
         });
-
         start.performClick();
     }
+
+
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        // Add a marker in Sydney and move the camera
+        LatLng sydney = new LatLng(-34, 151);
+        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+    }
+
 
     private boolean uploadToDB(Track track){
         ContentValues values = new ContentValues();

@@ -3,4 +3,5 @@
     <string name="no_distance">0.00m</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
+    <string name="title_activity_maps">Map</string>
 </resources>
