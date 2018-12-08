@@ -33,7 +33,7 @@ import com.google.gson.Gson;
 
 import java.util.Calendar;
 
-public class Tracking extends AppCompatActivity  implements OnMapReadyCallback{
+public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     private static final String TAG = "Tracking";
     public static final String BROADCAST_ACTION = "GET_LOCATION";
 
@@ -106,13 +106,20 @@ public class Tracking extends AppCompatActivity  implements OnMapReadyCallback{
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
+    private void setMapLocation(){
+        if(newTrack!=null){
+            Double lat = newTrack.getEndLocationLat();
+            Double lng = newTrack.getEndLocationLong();
+
+            LatLng here = new LatLng(lat,lng);
+            mMap.addMarker(new MarkerOptions().position(here).title("Your position"));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(here));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo( 17.0f ));
+            Log.d(TAG, "setMapLocation: Set new location");
+        }
+    }
 
     private boolean uploadToDB(Track track){
         ContentValues values = new ContentValues();
@@ -147,6 +154,8 @@ public class Tracking extends AppCompatActivity  implements OnMapReadyCallback{
                 newTrack.setName(newTrack.getFormattedDistance()+" on "+newTrack.getStartDate());
 
                 Tracking.distance.setText(newTrack.getFormattedDistance());
+
+                setMapLocation();
             }else{
                 Log.d(TAG, "onReceive: Error");
             }

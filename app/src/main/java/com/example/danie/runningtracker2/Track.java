@@ -17,7 +17,7 @@ public class Track {
     private Double startLocationLong;
     private Double endLocationLat;
     private Double endLocationLong;
-    private double distance;
+    private Double distance;
     private long duration =0;
     private Calendar startNow;
     private Calendar endNow;
