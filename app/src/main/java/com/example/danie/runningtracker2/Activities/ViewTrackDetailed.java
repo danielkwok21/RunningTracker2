@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 import com.example.danie.runningtracker2.Adapters.TracksRecyclerAdapter;
+import com.example.danie.runningtracker2.ContentProviders.TracksProvider;
 import com.example.danie.runningtracker2.Track;
 import com.example.danie.runningtracker2.R;
 import com.google.android.gms.maps.CameraUpdate;
@@ -48,7 +49,7 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
             gson = new Gson();
 
             if(extras!=null){
-                jsonObject = extras.getString(TracksRecyclerAdapter.JSON_OBJECT);
+                jsonObject = extras.getString(TracksProvider.JSON_OBJECT);
                 track = gson.fromJson(jsonObject, Track.class);
             }
         }
@@ -68,11 +69,12 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
             mMap.addMarker( new MarkerOptions().position(end));
 
             //setting zoom to fit all markers
-            LatLngBounds bounds = new LatLngBounds(start, end);
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            builder.include(start).include(end);
             final int width = getResources().getDisplayMetrics().widthPixels;
             final int height = getResources().getDisplayMetrics().heightPixels;
             final int padding = (int)(width*0.12);
-            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), width, height, padding));
 
 
             //populating latlngs list to draw route

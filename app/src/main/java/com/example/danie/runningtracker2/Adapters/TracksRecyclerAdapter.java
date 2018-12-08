@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.danie.runningtracker2.ContentProviders.TracksProvider;
 import com.example.danie.runningtracker2.Track;
 import com.example.danie.runningtracker2.R;
 import com.example.danie.runningtracker2.Activities.ViewTrackDetailed;
@@ -19,7 +20,6 @@ import java.util.List;
 
 public class TracksRecyclerAdapter extends RecyclerView.Adapter<TracksRecyclerAdapter.TrackViewHolder>{
     private static final String TAG = "TracksRecyclerAdapter";
-    public static final String JSON_OBJECT = "Track";
     private List<Track> tracks;
 
     public TracksRecyclerAdapter(List<Track> tracks){
@@ -62,7 +62,7 @@ public class TracksRecyclerAdapter extends RecyclerView.Adapter<TracksRecyclerAd
                 Intent i = new Intent(c, ViewTrackDetailed.class);
                 String jsonObject = gson.toJson(thisTrack);
 
-                i.putExtra(JSON_OBJECT, jsonObject);
+                i.putExtra(TracksProvider.JSON_OBJECT, jsonObject);
                 c.startActivity(i);
             });
         }

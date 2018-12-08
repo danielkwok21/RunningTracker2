@@ -102,9 +102,14 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                 start.setText(R.string.start);
                 stopService(intent);
                 stopWatch.stop();
-
-
                 uploadToDB(newTrack);
+
+                //open detailed view
+                Intent i = new Intent(this, ViewTrackDetailed.class);
+                String jsonObject = gson.toJson(newTrack);
+
+                i.putExtra(TracksProvider.JSON_OBJECT, jsonObject);
+                startActivity(i);
 
                 serviceRunning = false;
             }
