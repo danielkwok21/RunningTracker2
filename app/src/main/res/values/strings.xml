@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Running Tracker</string>
-    <string name="no_distance">0 m</string>
+    <string name="no_distance">0.00m</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
 </resources>

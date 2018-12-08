@@ -25,8 +25,7 @@ import com.example.danie.runningtracker2.Track;
 import com.example.danie.runningtracker2.Util;
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Calendar;
 
 public class Tracking extends AppCompatActivity {
     private static final String TAG = "Tracking";
@@ -95,6 +94,10 @@ public class Tracking extends AppCompatActivity {
     private boolean uploadToDB(Track track){
         ContentValues values = new ContentValues();
         gson = new Gson();
+
+
+        newTrack.setDuration(Calendar.getInstance());
+
         try{
             values.put(TracksProvider.JSON_OBJECT, gson.toJson(track));
             getContentResolver().insert(TracksProvider.CONTENT_URL, values);
@@ -109,7 +112,6 @@ public class Tracking extends AppCompatActivity {
     public class LocationReceiver extends BroadcastReceiver {
         Gson gson = new Gson();
         Double distance;
-        String unit;
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -118,11 +120,10 @@ public class Tracking extends AppCompatActivity {
             if(intent.getAction().equals(filter.getAction(0))){
                 String json = intent.getStringExtra(LocationService.TRACK);
                 newTrack = gson.fromJson(json, Track.class);
-                newTrack.setDuration(stopWatch.getBase());
-
                 distance= newTrack.getDistance();
-                unit = newTrack.getUnit();
-                Tracking.distance.setText(String.format("%.2f", distance)+unit);
+                newTrack.setName(newTrack.getFormattedDistance()+" on "+newTrack.getStartDate());
+
+                Tracking.distance.setText(newTrack.getFormattedDistance());
             }else{
                 Log.d(TAG, "onReceive: Error");
             }
@@ -160,6 +161,24 @@ public class Tracking extends AppCompatActivity {
             }else{
                 Util.Toast(this, "onRequestPermissionsResult: Permission not granted");
             }
+        }
+//
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(locationReceiver!=null) {
+            registerReceiver(locationReceiver, filter);
+        }
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(locationReceiver!=null){
+            unregisterReceiver(locationReceiver);
         }
     }
 }

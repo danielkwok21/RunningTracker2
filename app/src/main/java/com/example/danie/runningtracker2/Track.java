@@ -3,56 +3,123 @@ package com.example.danie.runningtracker2;
 
 import android.location.Location;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 public class Track {
     private String name;
-    private Location startLocation;
-    private Location endLocation;
+    private Double startLocationLat;
+    private String startDate;
+    private String startTime;
+    private String endDate;
+    private String endTime;
+    private Double startLocationLong;
+    private Double endLocationLat;
+    private Double endLocationLong;
     private double distance;
-    private String unit;
     private long duration =0;
+    private Calendar startNow;
+    private Calendar endNow;
 
-    public Track(Location startLocation, Location endLocation, double distance, String unit, long duration){
-        this.name = Double.toString(distance) + unit+" for " + Long.toString(duration);
-        this.startLocation = startLocation;
-        this.endLocation = endLocation;
+    public Track(Location startLocation, Location endLocation, double distance, Calendar startNow){
+        this.startLocationLat = startLocation.getLatitude();
+        this.startLocationLong = startLocation.getLongitude();
+        this.endLocationLat = endLocation.getLatitude();
+        this.endLocationLong = endLocation.getLongitude();
         this.distance = distance;
-        this.unit = unit;
-        this.duration = duration;
+        this.startNow = startNow;
+
+        startDate = setDate(startNow.getTime());
+        startTime = setTime(startNow.getTime());
     }
 
-    public Track(Location startLocation, Location endLocation, double distance, String unit){
-        this.name = Double.toString(distance) + unit+" for " + Long.toString(duration);
-        this.startLocation = startLocation;
-        this.endLocation = endLocation;
-        this.distance = distance;
-        this.unit = unit;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getName() {
         return name;
     }
 
-    public Location getStartLocation() {
-        return startLocation;
+    public Double getStartLocationLat() {
+        return startLocationLat;
     }
 
-    public Location getEndLocation() {
-        return endLocation;
+    public Double getStartLocationLong() {
+        return startLocationLong;
+    }
+
+    public Double getEndLocationLat() {
+        return endLocationLat;
+    }
+
+    public Double getEndLocationLong() {
+        return endLocationLong;
     }
 
     public double getDistance() {
         return distance;
     }
 
-    public String getUnit() {
-        return unit;
+    public String getFormattedDistance(){
+        Double newDistance = distance;
+        final String METER = "m";
+        final String KILOMETER = "km";
+        String unit = METER;
+        //converts to km if distance is above 1000m
+        if(distance>1000){
+            newDistance = distance/1000;
+            unit = KILOMETER;
+        }
+        return String.format("%.2f", newDistance)+unit;
     }
 
     public long getDuration() {
         return duration;
     }
 
-    public void setDuration(long duration) {
-        this.duration = duration;
+    public String getFormattedDuration(){
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        return sdf.format(duration);
     }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public Calendar getStartNow() {
+        return startNow;
+    }
+
+    public void setDuration(Calendar endNow) {
+        this.endNow = endNow;
+        endDate = setDate(endNow.getTime());
+        endTime = setTime(endNow.getTime());
+
+        this.duration = endNow.getTime().getTime() - startNow.getTime().getTime();
+    }
+
+    private String setTime(Date d){
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        return sdf.format(d);
+    }
+
+    private String setDate(Date d){
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
+        return sdf.format(d);
+    }
+
 }

@@ -31,7 +31,7 @@ public class TracksProvider extends ContentProvider {
 
     //fields
     public static final String ID = "id";
-    public static final String JSON_OBJECT = "jsonObject";
+    public static final String JSON_OBJECT = "json_object";
     private static final int URI_CODE = 1;
     private static HashMap<String, String> values;
 

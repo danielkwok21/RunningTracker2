@@ -14,18 +14,16 @@ import android.util.Log;
 
 import com.example.danie.runningtracker2.Activities.Tracking;
 import com.example.danie.runningtracker2.Track;
+import com.example.danie.runningtracker2.Util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.Calendar;
+import java.util.Date;
+
 public class LocationService extends Service {
     private static final String TAG = "LocationService";
-    public static final String START_LOCATION = "startLocation";
-    public static final String END_LOCATION = "endLocation";
-    public static final String DISTANCE = "distance";
-    public final String METER = "m";
-    public final String KILOMETER = "km";
     public static final String TRACK = "newTrack";
-
 
     private IBinder locationServiceBinder;
     private Intent broadcastIntent;
@@ -64,14 +62,12 @@ public class LocationService extends Service {
             Location prevLocation;
             Location startLocation;
             double calcDistance=0;
-            String unit = METER;
 
             Track newTrack;
             Gson gson = new Gson();
 
             @Override
             public void onLocationChanged(Location location) {
-
                 currentLocation = location;
 
                 if(firstCall){
@@ -82,21 +78,12 @@ public class LocationService extends Service {
 
                 calcDistance = calcDistance+prevLocation.distanceTo(currentLocation);
 
-                Log.d(TAG, "calcDistance: "+calcDistance);
-                //converts to km if distance is above 1000m
-                if(calcDistance>1000 && unit.equals(METER)){
-                    calcDistance/=1000;
-                    unit = KILOMETER;
-                }
-
                 prevLocation = location;
 
-                Log.d(TAG, "onLocationChanged: startLocation: "+startLocation);
-                Log.d(TAG, "onLocationChanged: currentLocation: "+currentLocation);
                 Log.d(TAG, "onLocationChanged: calcDistance: "+calcDistance);
 
                 //creating new track object
-                newTrack = new Track(startLocation, currentLocation, calcDistance, unit);
+                newTrack = new Track(startLocation, currentLocation, calcDistance, Calendar.getInstance());
 
                 //broadcasts info
                 broadcastIntent = new Intent();
@@ -126,11 +113,10 @@ public class LocationService extends Service {
         };
 
         locationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
-        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if (location != null) {
-            locationListener.onLocationChanged(location);
-        }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+        Location x = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        locationListener.onLocationChanged(x);
+
     }
 
     @Override

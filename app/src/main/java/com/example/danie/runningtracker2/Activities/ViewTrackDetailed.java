@@ -2,13 +2,15 @@ package com.example.danie.runningtracker2.Activities;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
 
 import com.example.danie.runningtracker2.Adapters.TracksRecyclerAdapter;
 import com.example.danie.runningtracker2.Track;
 import com.example.danie.runningtracker2.R;
+import com.example.danie.runningtracker2.Util;
 import com.google.gson.Gson;
+
+import java.text.SimpleDateFormat;
 
 public class ViewTrackDetailed extends AppCompatActivity {
     private static final String TAG = "ViewTrackDetailed";
@@ -40,8 +42,6 @@ public class ViewTrackDetailed extends AppCompatActivity {
         }
 
         initComponent();
-
-        Log.d(TAG, "Track: "+track.toString());
     }
 
 
@@ -52,5 +52,13 @@ public class ViewTrackDetailed extends AppCompatActivity {
         endTime = findViewById(R.id.log_detailed_endtime_tv);
         distance = findViewById(R.id.log_detailed_distance);
         duration = findViewById(R.id.log_detailed_duration);
+
+        startDate.setText(track.getStartDate());
+        startTime.setText(track.getStartTime());
+        endDate.setText(track.getEndDate());
+        endTime.setText(track.getEndTime());
+
+        distance.setText(track.getFormattedDistance());
+        duration.setText(track.getFormattedDuration());
     }
 }

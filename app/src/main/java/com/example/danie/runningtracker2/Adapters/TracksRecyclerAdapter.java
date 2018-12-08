@@ -34,9 +34,8 @@ public class TracksRecyclerAdapter extends RecyclerView.Adapter<TracksRecyclerAd
 
         //inflate layout
         View view = layoutInflater.inflate(R.layout.recycler_view_layout, viewGroup, false);
-        TrackViewHolder trackViewHolder = new TrackViewHolder(context, view);
 
-        return trackViewHolder;
+        return new TrackViewHolder(context, view);
     }
 
     @Override

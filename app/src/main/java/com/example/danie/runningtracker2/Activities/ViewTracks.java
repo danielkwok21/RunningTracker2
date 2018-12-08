@@ -41,7 +41,6 @@ public class ViewTracks extends AppCompatActivity {
 
 
     private List<Track> getTracksFromProvider(){
-        Log.d(TAG, "getTracksFromProvider: ");
         Uri uri = TracksProvider.CONTENT_URL;
         Cursor c = contentResolver.query(uri, null, null, null, TracksProvider.ID);
         Track track;
@@ -52,9 +51,13 @@ public class ViewTracks extends AppCompatActivity {
         if(c!=null){
             if(c.moveToFirst()){
                 do{
-                    String json = c.getString(c.getColumnIndex(TracksProvider.JSON_OBJECT));
-                    track = gson.fromJson(json, Track.class);
-                    tracks.add(track);
+                    try{
+                        String json = c.getString(c.getColumnIndex(TracksProvider.JSON_OBJECT));
+                        track = gson.fromJson(json, Track.class);
+                        tracks.add(track);
+                    }catch(Exception e){
+                        Log.d(TAG, "getTracksFromProvider: "+e);
+                    }
                 }while(c.moveToNext());
             }else{
                 Log.d(TAG, "getTracksFromProvider: No tracks");
