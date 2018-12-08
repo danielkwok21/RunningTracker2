@@ -27,17 +27,25 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.RoundCap;
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
 
 public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     private static final String TAG = "Tracking";
     public static final String BROADCAST_ACTION = "GET_LOCATION";
+    private static final String THIS_TRACK = "thisTrack";
 
-    Intent i;
+    Intent intent;
     IntentFilter filter;
     LocationReceiver locationReceiver;
 
@@ -48,7 +56,11 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     GoogleMap mMap;
 
     boolean serviceRunning = false;
+
     Track newTrack;
+    List<LatLng> latlngs = new ArrayList<>();
+    Iterator<LatLng> i = latlngs.iterator();
+
     Gson gson;
 
     @Override
@@ -72,16 +84,15 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
         stopWatch = findViewById(R.id.tracking_duration_chr);
         start = findViewById(R.id.tracking_start_btn);
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+                .findFragmentById(R.id.track_detailed_map);
         mapFragment.getMapAsync(this);
 
         start.setOnClickListener((v)->{
             if (!serviceRunning) {
                 //start detecting location
                 start.setText(R.string.stop);
-                i = new Intent(getApplicationContext(), LocationService.class);
-                startService(i);
-
+                intent = new Intent(getApplicationContext(), LocationService.class);
+                startService(intent);
                 stopWatch.setBase(SystemClock.elapsedRealtime());
                 stopWatch.start();
 
@@ -89,9 +100,9 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             } else {
                 //stop detecting location
                 start.setText(R.string.start);
-                stopService(i);
-
+                stopService(intent);
                 stopWatch.stop();
+
 
                 uploadToDB(newTrack);
 
@@ -108,16 +119,27 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
         mMap = googleMap;
     }
 
-    private void setMapLocation(){
-        if(newTrack!=null){
-            Double lat = newTrack.getEndLocationLat();
-            Double lng = newTrack.getEndLocationLong();
+    private void redrawRoute(){
 
-            LatLng here = new LatLng(lat,lng);
-            mMap.addMarker(new MarkerOptions().position(here).title("Your position"));
+        if(!latlngs.isEmpty()){
+            mMap.clear();
+
+            //set starting point
+            LatLng here = new LatLng(newTrack.getEndLocationLat(), newTrack.getEndLocationLong());
+            mMap.addMarker(new MarkerOptions().position(here).title(THIS_TRACK));
             mMap.moveCamera(CameraUpdateFactory.newLatLng(here));
-            mMap.animateCamera(CameraUpdateFactory.zoomTo( 17.0f ));
-            Log.d(TAG, "setMapLocation: Set new location");
+            mMap.animateCamera(CameraUpdateFactory.zoomTo( 15.0f ));
+
+            //populating latlngs list to draw route
+            Polyline route = mMap.addPolyline(new PolylineOptions()
+                    .clickable(true)
+                    .addAll(latlngs));
+            route.setTag(THIS_TRACK);
+
+            route.setEndCap(new RoundCap());
+            route.setWidth(10);
+            route.setColor(getResources().getColor(R.color.colorAccent));
+            route.setJointType(JointType.ROUND);
         }
     }
 
@@ -150,12 +172,16 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             if(intent.getAction().equals(filter.getAction(0))){
                 String json = intent.getStringExtra(LocationService.TRACK);
                 newTrack = gson.fromJson(json, Track.class);
-                distance= newTrack.getDistance();
+                latlngs.add(new LatLng(newTrack.getEndLocationLat(), newTrack.getEndLocationLong()));
+
+                //setting track object variables
                 newTrack.setName(newTrack.getFormattedDistance()+" on "+newTrack.getStartDate());
+                newTrack.setLatlngs(latlngs);
 
+                distance= newTrack.getDistance();
                 Tracking.distance.setText(newTrack.getFormattedDistance());
+                redrawRoute();
 
-                setMapLocation();
             }else{
                 Log.d(TAG, "onReceive: Error");
             }

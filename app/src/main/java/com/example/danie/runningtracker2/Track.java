@@ -3,9 +3,13 @@ package com.example.danie.runningtracker2;
 
 import android.location.Location;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class Track {
     private String name;
@@ -21,6 +25,7 @@ public class Track {
     private long duration =0;
     private Calendar startNow;
     private Calendar endNow;
+    private List<LatLng> latlngs;
 
     public Track(Location startLocation, Location endLocation, double distance, Calendar startNow){
         this.startLocationLat = startLocation.getLatitude();
@@ -100,16 +105,20 @@ public class Track {
         return endTime;
     }
 
-    public Calendar getStartNow() {
-        return startNow;
-    }
-
     public void setDuration(Calendar endNow) {
         this.endNow = endNow;
         endDate = setDate(endNow.getTime());
         endTime = setTime(endNow.getTime());
 
         this.duration = endNow.getTime().getTime() - startNow.getTime().getTime();
+    }
+
+    public void setLatlngs(List<LatLng> list){
+        this.latlngs = list;
+    }
+
+    public List<LatLng> getLatlngs() {
+        return latlngs;
     }
 
     private String setTime(Date d){
@@ -121,5 +130,7 @@ public class Track {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
         return sdf.format(d);
     }
+
+
 
 }
