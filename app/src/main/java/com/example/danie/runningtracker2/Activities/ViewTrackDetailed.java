@@ -70,9 +70,11 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
 
             //setting zoom to fit all markers
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
-            builder.include(start).include(end);
+            for(LatLng l:track.getLatlngs()){
+                builder.include(l);
+            }
             final int width = getResources().getDisplayMetrics().widthPixels;
-            final int height = getResources().getDisplayMetrics().heightPixels;
+            final int height = (int)Math.round(getResources().getDisplayMetrics().heightPixels*0.6);
             final int padding = (int)(width*0.12);
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), width, height, padding));
 
