@@ -1,6 +1,8 @@
 package com.example.danie.runningtracker2.Activities;
 
 import android.Manifest;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -10,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -44,10 +47,13 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     private static final String TAG = "Tracking";
     public static final String BROADCAST_ACTION = "GET_LOCATION";
     private static final String THIS_TRACK = "thisTrack";
+    private static final int UNIQUE_ID = 1234;
 
     Intent intent;
     IntentFilter filter;
     LocationReceiver locationReceiver;
+    NotificationCompat.Builder newNotificationBuilder;
+    NotificationManager notificationManager;
 
     static TextView distance;
     static Chronometer stopWatch;
@@ -102,6 +108,8 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                 start.setText(R.string.start);
                 stopService(intent);
                 stopWatch.stop();
+                notificationManager.cancel(UNIQUE_ID);
+
                 uploadToDB(newTrack);
 
                 //open detailed view
@@ -116,8 +124,6 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
         });
         start.performClick();
     }
-
-
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -186,6 +192,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                 distance= newTrack.getDistance();
                 Tracking.distance.setText(newTrack.getFormattedDistance());
                 redrawRoute();
+                startNotification();
 
             }else{
                 Log.d(TAG, "onReceive: Error");
@@ -226,6 +233,24 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             }
         }
 //
+    }
+
+    private void startNotification(){
+        Intent intent = new Intent(this, Tracking.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+        //builds the body of the notification itself
+        newNotificationBuilder = new NotificationCompat.Builder(this);
+        newNotificationBuilder.setSmallIcon(R.drawable.icon)
+                .setContentTitle("Distance covered: "+newTrack.getFormattedDistance())
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(false);
+
+        //sends notification to phone
+        notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(UNIQUE_ID, newNotificationBuilder.build());
     }
 
     @Override
