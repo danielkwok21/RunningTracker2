@@ -85,6 +85,11 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
         }
     }
 
+    public static void setWatch(){
+        stopWatch.setBase(SystemClock.elapsedRealtime());
+        stopWatch.start();
+    }
+
     private void initComponents() {
         distance = findViewById(R.id.tracking_distance_tv);
         stopWatch = findViewById(R.id.tracking_duration_chr);
@@ -99,8 +104,6 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                 start.setText(R.string.stop);
                 intent = new Intent(getApplicationContext(), LocationService.class);
                 startService(intent);
-                stopWatch.setBase(SystemClock.elapsedRealtime());
-                stopWatch.start();
 
                 serviceRunning = true;
             } else {

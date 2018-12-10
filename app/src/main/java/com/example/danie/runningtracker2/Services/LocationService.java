@@ -20,6 +20,7 @@ import com.google.gson.GsonBuilder;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class LocationService extends Service {
     private static final String TAG = "LocationService";
@@ -68,9 +69,11 @@ public class LocationService extends Service {
 
             @Override
             public void onLocationChanged(Location location) {
+                Log.d(TAG, "onLocationChanged: ");
                 currentLocation = location;
 
                 if(firstCall){
+                    Tracking.setWatch();
                     startLocation = currentLocation;
                     prevLocation = currentLocation;
                     firstCall = false;
@@ -112,12 +115,28 @@ public class LocationService extends Service {
             }
         };
 
-        locationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-        Location x = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        locationListener.onLocationChanged(x);
+        locationManager = (LocationManager)getApplicationContext().getSystemService(LOCATION_SERVICE);
+        List<String> providers = locationManager.getProviders(true);
+        Location bestLocation = null;
+        for (String provider : providers) {
+            Location loc = locationManager.getLastKnownLocation(provider);
+            if (loc == null) {
+                continue;
+            }
+            if (bestLocation == null || loc.getAccuracy() < bestLocation.getAccuracy()) {
+                // Found best last known location: %s", l);
+                bestLocation = loc;
+            }
+        }
+        
+        if(bestLocation!=null){
+            locationListener.onLocationChanged(bestLocation);            
+        }else{
+            Util.Toast(this, "Last known location cannot be found");
+        }
 
     }
+
 
     @Override
     public IBinder onBind(Intent intent) {
