@@ -16,6 +16,7 @@ import com.example.danie.runningtracker2.Activities.ViewTrackDetailed;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.Collections;
 import java.util.List;
 
 public class TracksRecyclerAdapter extends RecyclerView.Adapter<TracksRecyclerAdapter.TrackViewHolder>{
@@ -23,6 +24,7 @@ public class TracksRecyclerAdapter extends RecyclerView.Adapter<TracksRecyclerAd
     private List<Track> tracks;
 
     public TracksRecyclerAdapter(List<Track> tracks){
+        Collections.reverse(tracks);
         this.tracks = tracks;
     }
 

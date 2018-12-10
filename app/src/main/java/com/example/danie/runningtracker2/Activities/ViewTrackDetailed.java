@@ -75,7 +75,7 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
         super.onBackPressed();
         if(prevActivity!=null){
             if(prevActivity.equals("Tracking")){
-                Intent i = new Intent(this, MainActivity.class);
+                Intent i = new Intent(this, ViewTracks.class);
                 startActivity(i);
             }
         }

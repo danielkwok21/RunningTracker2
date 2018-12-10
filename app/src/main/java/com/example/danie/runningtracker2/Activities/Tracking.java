@@ -46,13 +46,10 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     private static final String TAG = "Tracking";
     public static final String BROADCAST_ACTION = "GET_LOCATION";
     private static final String THIS_TRACK = "thisTrack";
-    private static final int UNIQUE_ID = 1234;
 
     Intent serviceIntent;
     IntentFilter filter;
     LocationReceiver locationReceiver;
-    NotificationCompat.Builder newNotificationBuilder;
-    NotificationManager notificationManager;
 
     static TextView distance;
     Chronometer stopWatch;
@@ -63,7 +60,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     static boolean serviceRunning = false;
     boolean googlePlayAvailable;
 
-    Track newTrack;
+    Track newTrack = null;
 
     Gson gson;
 
@@ -90,7 +87,6 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
         }
     }
 
-
     private void initComponents() {
         distance = findViewById(R.id.tracking_distance_tv);
         stopWatch = findViewById(R.id.tracking_duration_chr);
@@ -103,31 +99,33 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
         }
 
         start.setOnClickListener((v)->{
+
             if (!serviceRunning) {
                 //start detecting location
                 serviceIntent = new Intent(getApplicationContext(), LocationService.class);
                 startService(serviceIntent);
-
-                newTrack = new Track();
             } else {
-                //stop detecting location
-                newTrack.wrapUp();
-                stopService(serviceIntent);
-                notificationManager.cancel(UNIQUE_ID);
-                serviceRunning = false;
+                try{
+                    //stop detecting location
+                    newTrack.wrapUp();
+                    stopService(serviceIntent);
+                    serviceRunning = false;
 
-                //set ui
-                stopWatch.stop();
-                start.setText(R.string.start);
+                    //set ui
+                    stopWatch.stop();
+                    start.setText(R.string.start);
 
-                uploadToDB(newTrack);
+                    uploadToDB(newTrack);
 
-                //open detailed view
-                Intent i = new Intent(this, ViewTrackDetailed.class);
-                String jsonObject = gson.toJson(newTrack);
-                i.putExtra(TracksProvider.JSON_OBJECT, jsonObject);
-                i.putExtra("prevActivity", "Tracking");
-                startActivity(i);
+                    //open detailed view
+                    Intent i = new Intent(this, ViewTrackDetailed.class);
+                    String jsonObject = gson.toJson(newTrack);
+                    i.putExtra(TracksProvider.JSON_OBJECT, jsonObject);
+                    i.putExtra("prevActivity", "Tracking");
+                    startActivity(i);
+                }catch(Exception e){
+                    Log.d(TAG, "initComponents: "+e);
+                }
             }
         });
 
@@ -166,7 +164,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
 
                 //set current point
                 LatLng here = LatLngs.get(LatLngs.size()-1);
-                mMap.addMarker(new MarkerOptions().position(start).title(THIS_TRACK));
+                mMap.addMarker(new MarkerOptions().position(here).title(THIS_TRACK));
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(here));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(20.0f));
 
@@ -195,6 +193,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             return true;
         }catch(Exception e){
             Log.d(TAG, "uploadToDB: "+e);
+            Util.Toast(this, "Unable to store track");
             return false;
         }
     }
@@ -203,31 +202,30 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "onReceive: "+intent.getAction());
+                if(intent.getAction().equals(filter.getAction(0))){
+                    Bundle bundle = intent.getBundleExtra(LocationService.DATA);
+                    newTrack = (Track) bundle.getSerializable(LocationService.NEW_TRACK);
 
-            if(intent.getAction().equals(filter.getAction(0))){
-                Double loclat = intent.getDoubleExtra(LocationService.LOC_LAT, 0.0f);
-                Double loclong = intent.getDoubleExtra(LocationService.LOC_LONG, 0.0f);
+                    if(newTrack!=null) {
+                        //set ui
+                        if (newTrack.getLocations().size() == 1) {
+                            stopWatch.setBase(SystemClock.elapsedRealtime());
+                        }
+                        stopWatch.start();
+                        start.setText(R.string.stop);
+                        Tracking.distance.setText(newTrack.getFormattedDistance());
+                        redrawRoute();
 
-                newTrack.updateTrack(loclat, loclong);
-
-
-                //set ui
-                if(newTrack.getLocations().size()==1){
-                    stopWatch.setBase(SystemClock.elapsedRealtime());
+                        serviceRunning = true;
+                    }else {
+                        Log.d(TAG, "onReceive: newTrack is null");
+                    }
+                }else{
+                    Log.d(TAG, "onReceive: filter different");
                 }
-                stopWatch.start();
-                start.setText(R.string.stop);
-                Tracking.distance.setText(newTrack.getFormattedDistance());
-                redrawRoute();
-                startNotification();
-
-                serviceRunning = true;
-            }else{
-                Log.d(TAG, "onReceive: Error");
             }
         }
-    }
+
 
     private boolean checkPermissions() {
         return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -263,24 +261,6 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
 //
     }
 
-    private void startNotification(){
-        Intent intent = new Intent(this, Tracking.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
-        //builds the body of the notification itself
-        newNotificationBuilder = new NotificationCompat.Builder(this);
-        newNotificationBuilder.setSmallIcon(R.drawable.icon)
-                .setContentTitle("Distance covered: "+newTrack.getFormattedDistance())
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(false);
-
-        //sends notification to phone
-        notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(UNIQUE_ID, newNotificationBuilder.build());
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -288,7 +268,6 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             registerReceiver(locationReceiver, filter);
         }
     }
-
 
     @Override
     protected void onPause() {

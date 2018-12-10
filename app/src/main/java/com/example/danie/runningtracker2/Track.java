@@ -6,14 +6,15 @@ import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-public class Track {
-    private static final String TAG = "Track";
+public class Track implements Serializable {
+    private final String TAG = "Track";
 
     private String name;
     private Double startLocationLat;
@@ -38,7 +39,9 @@ public class Track {
         startTime = getFormattedTime(startNow.getTime());
     }
 
-    public void updateTrack(Double lat, Double lng){
+    public void updateTrack(Location location){
+        Double lat = location.getLatitude();
+        Double lng = location.getLongitude();
         Location prevLocation;
 
         latlngs.add(new LatLng(lat, lng));
@@ -46,8 +49,8 @@ public class Track {
         currentLocation.setLatitude(lat);
         currentLocation.setLongitude(lng);
 
-        //if this location is the first location
         if(locations.size()==0){
+            //if this location is the first location
             startLocationLat = currentLocation.getLatitude();
             startLocationLong = currentLocation.getLongitude();
             prevLocation = currentLocation;
