@@ -39,7 +39,6 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
     Gson gson;
 
     boolean googlePlayAvailable;
-    String prevActivity = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +61,6 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
             if(extras!=null){
                 jsonObject = extras.getString(TracksProvider.JSON_OBJECT);
                 track = gson.fromJson(jsonObject, Track.class);
-
-                prevActivity = extras.getString("prevActivity");
             }
         }
 
@@ -71,24 +68,13 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
     }
 
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        if(prevActivity!=null){
-            if(prevActivity.equals("Tracking")){
-                Intent i = new Intent(this, ViewTracks.class);
-                startActivity(i);
-            }
-        }
-    }
-
-    @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         if(!track.getLatLngs().isEmpty()){
             //set starting & endingpoint
-            LatLng start = new LatLng(track.getStartLocationLat(), track.getStartLocationLong());
+            LatLng start = track.getStartLatLng();
             mMap.addMarker( new MarkerOptions().position(start));
-            LatLng end = new LatLng(track.getEndLocationLat(), track.getEndLocationLong());
+            LatLng end = track.getEndLatLng();
             mMap.addMarker( new MarkerOptions().position(end));
 
             //setting zoom to fit all markers

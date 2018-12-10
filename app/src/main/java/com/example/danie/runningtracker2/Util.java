@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 public class Util {
     public static void Toast(Context c, String s){
         Toast toast = Toast.makeText(c, s, Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.TOP, 0, 50);
+        toast.setGravity(Gravity.BOTTOM, 0, 600);
         toast.show();
     }
 

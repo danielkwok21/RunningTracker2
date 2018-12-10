@@ -46,7 +46,7 @@ public class TracksProvider extends ContentProvider {
     public static final String TABLE_NAME = "tracksTABLE";
     public static final int DATABASE_VERSION = 1;
     public static final String CREATE_DB_TABLE =
-            "CREATE TABLE " + TABLE_NAME
+            "CREATE TABLE IF NOT EXISTS " + TABLE_NAME
                     + "("
                     + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                     + JSON_OBJECT + " TEXT NOT NULL"

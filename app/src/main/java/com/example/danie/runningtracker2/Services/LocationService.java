@@ -14,6 +14,8 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -21,22 +23,23 @@ import com.example.danie.runningtracker2.Activities.Tracking;
 import com.example.danie.runningtracker2.R;
 import com.example.danie.runningtracker2.Track;
 import com.example.danie.runningtracker2.Util;
-import com.google.gson.FieldNamingPolicy;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
-import java.io.Serializable;
+import java.util.concurrent.Executor;
 
-public class LocationService extends Service {
+public class LocationService extends Service{
     private static final String TAG = "LocationService";
     public static final String NEW_TRACK = "newTrack";
-    public static final String DATA = "data";
     private static final int UNIQUE_ID = 1234;
 
     private IBinder locationServiceBinder;
-    private NotificationCompat.Builder newNotificationBuilder;
     private NotificationManager notificationManager;
 
+    //traditional methods
     private LocationManager locationManager;
     private LocationListener locationListener;
 
@@ -53,7 +56,6 @@ public class LocationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         locationServiceBinder = new LocationServiceBinder();
-        locationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
 
         startLocationService();
 
@@ -64,44 +66,41 @@ public class LocationService extends Service {
     public void onDestroy() {
         super.onDestroy();
         notificationManager.cancel(UNIQUE_ID);
+        locationManager = null;
+
     }
 
     @SuppressLint("MissingPermission")
     private void startLocationService() {
         Log.d(TAG, "startLocationService: ");
-
         newTrack = new Track();
         startNotification();
 
+        locationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
         locationListener = new LocationListener() {
-            private Intent broadcastIntent;
-            private Bundle bundle;
-
             @Override
             public void onLocationChanged(Location location) {
+                Intent broadcastIntent;
+                Gson gson = new Gson();
 
                 newTrack.updateTrack(location);
                 Log.d(TAG, "onLocationChanged: Lat: "+location.getLatitude()+"|Long: "+location.getLongitude());
 
                 //broadcasts Track object
                 broadcastIntent = new Intent();
-                bundle = new Bundle();
                 broadcastIntent.setAction(Tracking.BROADCAST_ACTION);
-                bundle.putSerializable(NEW_TRACK, newTrack);
-                broadcastIntent.putExtra(NEW_TRACK, bundle);
+                broadcastIntent.putExtra(NEW_TRACK, gson.toJson(newTrack));
+
                 sendBroadcast(broadcastIntent);
             }
-
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {
                 Log.d(TAG, "startLocationService: Status changed");
             }
-
             @Override
             public void onProviderEnabled(String provider) {
                 Log.d(TAG, "startLocationService: Provider enabled");
             }
-
             @Override
             public void onProviderDisabled(String provider) {
                 Log.d(TAG, "startLocationService: Provider disabled");
@@ -112,18 +111,20 @@ public class LocationService extends Service {
             }
         };
 
-        locationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(locationManager.getBestProvider(new Criteria(), false), 0, 0, locationListener);
-        Location x = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if(x!=null){
-            locationListener.onLocationChanged(x);
+        String provider= locationManager.getBestProvider(new Criteria(), false);
+        locationManager.requestLocationUpdates(provider, 0, 0, locationListener);
+
+        //get initial location
+        Location location = locationManager.getLastKnownLocation(provider);
+        if(location!=null){
+            locationListener.onLocationChanged(location);
         }else{
             Util.Toast(this, "Cannot detect current location");
         }
     }
 
-
     private void startNotification(){
+        NotificationCompat.Builder newNotificationBuilder;
         Intent intent = new Intent(this, Tracking.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
@@ -132,6 +133,7 @@ public class LocationService extends Service {
         newNotificationBuilder = new NotificationCompat.Builder(this);
         newNotificationBuilder.setSmallIcon(R.drawable.icon)
                 .setContentTitle("Distance covered: "+newTrack.getFormattedDistance())
+                .setContentText("Duration: "+newTrack.getFormattedDuration())
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(false);
@@ -141,11 +143,11 @@ public class LocationService extends Service {
         notificationManager.notify(UNIQUE_ID, newNotificationBuilder.build());
     }
 
-
     @Override
     public IBinder onBind(Intent intent) {
         return locationServiceBinder;
     }
+
 
     public class LocationServiceBinder extends Binder {
         public LocationService getService(){

@@ -1,8 +1,6 @@
 package com.example.danie.runningtracker2.Activities;
 
 import android.Manifest;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -12,7 +10,6 @@ import android.content.pm.PackageManager;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,6 +20,7 @@ import android.widget.TextView;
 
 import com.example.danie.runningtracker2.ContentProviders.TracksProvider;
 import com.example.danie.runningtracker2.R;
+import com.example.danie.runningtracker2.Services.GooglePlayLocationService;
 import com.example.danie.runningtracker2.Services.LocationService;
 import com.example.danie.runningtracker2.Track;
 import com.example.danie.runningtracker2.Util;
@@ -44,7 +42,8 @@ import java.util.List;
 
 public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     private static final String TAG = "Tracking";
-    public static final String BROADCAST_ACTION = "GET_LOCATION";
+    public static final String BROADCAST_ACTION = "getLocation";
+    public static final String GOOGLE_PLAY_SERVICES = "GooglePlayServices";
     private static final String THIS_TRACK = "thisTrack";
 
     Intent serviceIntent;
@@ -58,18 +57,18 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     GoogleMap mMap;
 
     static boolean serviceRunning = false;
-    boolean googlePlayAvailable;
+    boolean isGooglePlayAvailable;
 
     Track newTrack = null;
 
-    Gson gson;
+    Gson gson = new Gson();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        googlePlayAvailable = googlePlayAvailable();
-        if(googlePlayAvailable){
+        isGooglePlayAvailable = googlePlayAvailable();
+        if(isGooglePlayAvailable){
             setContentView(R.layout.activity_tracking);
         }else{
             setContentView(R.layout.activity_tracking2);
@@ -92,7 +91,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
         stopWatch = findViewById(R.id.tracking_duration_chr);
         start = findViewById(R.id.tracking_start_btn);
 
-        if(googlePlayAvailable){
+        if(isGooglePlayAvailable){
             mapFragment = (SupportMapFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.track_detailed_map);
             mapFragment.getMapAsync(this);
@@ -102,7 +101,11 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
 
             if (!serviceRunning) {
                 //start detecting location
-                serviceIntent = new Intent(getApplicationContext(), LocationService.class);
+                if(isGooglePlayAvailable){
+                    serviceIntent = new Intent(getApplicationContext(), GooglePlayLocationService.class);
+                }else{
+                    serviceIntent = new Intent(getApplicationContext(), LocationService.class);
+                }
                 startService(serviceIntent);
             } else {
                 try{
@@ -121,7 +124,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                     Intent i = new Intent(this, ViewTrackDetailed.class);
                     String jsonObject = gson.toJson(newTrack);
                     i.putExtra(TracksProvider.JSON_OBJECT, jsonObject);
-                    i.putExtra("prevActivity", "Tracking");
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(i);
                 }catch(Exception e){
                     Log.d(TAG, "initComponents: "+e);
@@ -152,7 +155,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     }
 
     private void redrawRoute(){
-        if(googlePlayAvailable) {
+        if(isGooglePlayAvailable) {
             List<LatLng> LatLngs = newTrack.getLatLngs();
             if (!LatLngs.isEmpty()) {
 
@@ -184,7 +187,6 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
 
     private boolean uploadToDB(Track track){
         ContentValues values = new ContentValues();
-        gson = new Gson();
 
         try{
             values.put(TracksProvider.JSON_OBJECT, gson.toJson(track));
@@ -199,17 +201,19 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     }
 
     public class LocationReceiver extends BroadcastReceiver {
+        private boolean firstCall = true;
 
         @Override
         public void onReceive(Context context, Intent intent) {
                 if(intent.getAction().equals(filter.getAction(0))){
-                    Bundle bundle = intent.getBundleExtra(LocationService.DATA);
-                    newTrack = (Track) bundle.getSerializable(LocationService.NEW_TRACK);
+                    String json = intent.getStringExtra(LocationService.NEW_TRACK);
+                    newTrack = gson.fromJson(json, Track.class);
 
                     if(newTrack!=null) {
                         //set ui
-                        if (newTrack.getLocations().size() == 1) {
+                        if (firstCall) {
                             stopWatch.setBase(SystemClock.elapsedRealtime());
+                            firstCall = false;
                         }
                         stopWatch.start();
                         start.setText(R.string.stop);

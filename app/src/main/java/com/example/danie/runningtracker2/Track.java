@@ -12,18 +12,18 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
-public class Track implements Serializable {
+public class Track{
     private final String TAG = "Track";
 
     private String name;
-    private Double startLocationLat;
-    private Double startLocationLong;
+    private LatLng startLatLng;
     private String startDate;
     private String startTime;
 
-    private Double endLocationLat;
-    private Double endLocationLong;
+    private LatLng endLatLng;
     private String endDate;
     private String endTime;
 
@@ -31,7 +31,6 @@ public class Track implements Serializable {
     private long duration =0;
     private Calendar startNow;
     private List<LatLng> latlngs = new ArrayList<>();
-    private List<Location> locations = new ArrayList<>();
 
     public Track(){
         startNow = Calendar.getInstance();
@@ -40,46 +39,47 @@ public class Track implements Serializable {
     }
 
     public void updateTrack(Location location){
-        Double lat = location.getLatitude();
-        Double lng = location.getLongitude();
+        LatLng currentLatLng;
+        Location currentLocation;
+        LatLng prevLatLng;
         Location prevLocation;
 
-        latlngs.add(new LatLng(lat, lng));
-        Location currentLocation = new Location("");
-        currentLocation.setLatitude(lat);
-        currentLocation.setLongitude(lng);
+        currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+        currentLocation = getLocationFromLatLng(currentLatLng);
 
-        if(locations.size()==0){
-            //if this location is the first location
-            startLocationLat = currentLocation.getLatitude();
-            startLocationLong = currentLocation.getLongitude();
-            prevLocation = currentLocation;
+        if(latlngs.size()==0){
+            //if this is the first latlng
+            prevLatLng = currentLatLng;
+            startLatLng = currentLatLng;
         }else{
-            prevLocation = locations.get(locations.size()-1);
+            //get the thus far latest latlng
+            prevLatLng = latlngs.get(latlngs.size()-1);
         }
+        prevLocation = getLocationFromLatLng(prevLatLng);
 
-        locations.add(currentLocation);
+        latlngs.add(currentLatLng);
 
         distance = distance+prevLocation.distanceTo(currentLocation);
-        Log.d(TAG, "updateTrack: locations.size()="+locations.size());
         Log.d(TAG, "updateTrack: distance="+distance);
         name = getFormattedDistance()+" on "+getStartDate();
     }
 
+    private Location getLocationFromLatLng(LatLng latLng){
+        Location l = new Location("");
+        l.setLatitude(latLng.latitude);
+        l.setLongitude(latLng.longitude);
+
+        return l;
+    }
+
     public void wrapUp(){
-        Calendar endNow;
-        endNow = Calendar.getInstance();
+        Calendar endNow = Calendar.getInstance();
         endDate = getFormattedDate(endNow.getTime());
         endTime = getFormattedTime(endNow.getTime());
 
         this.duration = endNow.getTime().getTime() - startNow.getTime().getTime();
 
-        endLocationLat = locations.get(locations.size()-1).getLatitude();
-        endLocationLong = locations.get(locations.size()-1).getLongitude();
-    }
-
-    public List<Location> getLocations(){
-        return locations;
+        endLatLng = latlngs.get(latlngs.size()-1);
     }
 
     public void setName(String name) {
@@ -88,22 +88,6 @@ public class Track implements Serializable {
 
     public String getName() {
         return name;
-    }
-
-    public Double getStartLocationLat() {
-        return startLocationLat;
-    }
-
-    public Double getStartLocationLong() {
-        return startLocationLong;
-    }
-
-    public Double getEndLocationLat() {
-        return endLocationLat;
-    }
-
-    public Double getEndLocationLong() {
-        return endLocationLong;
     }
 
     public double getDistance() {
@@ -122,14 +106,11 @@ public class Track implements Serializable {
         }
         return String.format("%.2f", newDistance)+unit;
     }
-
-    public long getDuration() {
-        return duration;
-    }
-
     public String getFormattedDuration(){
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-        return sdf.format(duration);
+        String hms = String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(duration),
+                TimeUnit.MILLISECONDS.toMinutes(duration) % TimeUnit.HOURS.toMinutes(1),
+                TimeUnit.MILLISECONDS.toSeconds(duration) % TimeUnit.MINUTES.toSeconds(1));
+        return hms;
     }
 
     public String getStartDate() {
@@ -148,9 +129,12 @@ public class Track implements Serializable {
         return endTime;
     }
 
+    public LatLng getStartLatLng() {
+        return startLatLng;
+    }
 
-    public void setLatlngs(List<LatLng> list){
-        this.latlngs = list;
+    public LatLng getEndLatLng() {
+        return endLatLng;
     }
 
     public List<LatLng> getLatLngs() {
