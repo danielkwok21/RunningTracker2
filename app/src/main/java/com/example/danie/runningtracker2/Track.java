@@ -2,6 +2,7 @@ package com.example.danie.runningtracker2;
 
 
 import android.location.Location;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -12,31 +13,70 @@ import java.util.Date;
 import java.util.List;
 
 public class Track {
+    private static final String TAG = "Track";
+
     private String name;
     private Double startLocationLat;
+    private Double startLocationLong;
     private String startDate;
     private String startTime;
-    private String endDate;
-    private String endTime;
-    private Double startLocationLong;
+
     private Double endLocationLat;
     private Double endLocationLong;
-    private Double distance;
+    private String endDate;
+    private String endTime;
+
+    private Double distance=0.0d;
     private long duration =0;
     private Calendar startNow;
-    private Calendar endNow;
-    private List<LatLng> latlngs;
+    private List<LatLng> latlngs = new ArrayList<>();
+    private List<Location> locations = new ArrayList<>();
 
-    public Track(Location startLocation, Location endLocation, double distance, Calendar startNow){
-        this.startLocationLat = startLocation.getLatitude();
-        this.startLocationLong = startLocation.getLongitude();
-        this.endLocationLat = endLocation.getLatitude();
-        this.endLocationLong = endLocation.getLongitude();
-        this.distance = distance;
-        this.startNow = startNow;
+    public Track(){
+        startNow = Calendar.getInstance();
+        startDate = getFormattedDate(startNow.getTime());
+        startTime = getFormattedTime(startNow.getTime());
+    }
 
-        startDate = setDate(startNow.getTime());
-        startTime = setTime(startNow.getTime());
+    public void updateTrack(Double lat, Double lng){
+        Location prevLocation;
+
+        latlngs.add(new LatLng(lat, lng));
+        Location currentLocation = new Location("");
+        currentLocation.setLatitude(lat);
+        currentLocation.setLongitude(lng);
+
+        //if this location is the first location
+        if(locations.size()==0){
+            startLocationLat = currentLocation.getLatitude();
+            startLocationLong = currentLocation.getLongitude();
+            prevLocation = currentLocation;
+        }else{
+            prevLocation = locations.get(locations.size()-1);
+        }
+
+        locations.add(currentLocation);
+
+        distance = distance+prevLocation.distanceTo(currentLocation);
+        Log.d(TAG, "updateTrack: locations.size()="+locations.size());
+        Log.d(TAG, "updateTrack: distance="+distance);
+        name = getFormattedDistance()+" on "+getStartDate();
+    }
+
+    public void wrapUp(){
+        Calendar endNow;
+        endNow = Calendar.getInstance();
+        endDate = getFormattedDate(endNow.getTime());
+        endTime = getFormattedTime(endNow.getTime());
+
+        this.duration = endNow.getTime().getTime() - startNow.getTime().getTime();
+
+        endLocationLat = locations.get(locations.size()-1).getLatitude();
+        endLocationLong = locations.get(locations.size()-1).getLongitude();
+    }
+
+    public List<Location> getLocations(){
+        return locations;
     }
 
     public void setName(String name) {
@@ -105,28 +145,21 @@ public class Track {
         return endTime;
     }
 
-    public void setDuration(Calendar endNow) {
-        this.endNow = endNow;
-        endDate = setDate(endNow.getTime());
-        endTime = setTime(endNow.getTime());
-
-        this.duration = endNow.getTime().getTime() - startNow.getTime().getTime();
-    }
 
     public void setLatlngs(List<LatLng> list){
         this.latlngs = list;
     }
 
-    public List<LatLng> getLatlngs() {
+    public List<LatLng> getLatLngs() {
         return latlngs;
     }
 
-    private String setTime(Date d){
+    private String getFormattedTime(Date d){
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
         return sdf.format(d);
     }
 
-    private String setDate(Date d){
+    private String getFormattedDate(Date d){
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
         return sdf.format(d);
     }

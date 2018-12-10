@@ -1,14 +1,15 @@
 package com.example.danie.runningtracker2.Activities;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import com.example.danie.runningtracker2.Adapters.TracksRecyclerAdapter;
 import com.example.danie.runningtracker2.ContentProviders.TracksProvider;
 import com.example.danie.runningtracker2.Track;
 import com.example.danie.runningtracker2.R;
-import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -16,7 +17,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -38,10 +38,21 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
     Track track;
     Gson gson;
 
+    boolean googlePlayAvailable;
+    String prevActivity = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        googlePlayAvailable = googlePlayAvailable();
+
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_view_track_detailed);
+
+        if(googlePlayAvailable){
+            setContentView(R.layout.activity_view_track_detailed);
+        }else{
+            setContentView(R.layout.activity_view_track_detailed2);
+        }
 
         if(savedInstanceState==null){
             Bundle extras = getIntent().getExtras();
@@ -51,17 +62,29 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
             if(extras!=null){
                 jsonObject = extras.getString(TracksProvider.JSON_OBJECT);
                 track = gson.fromJson(jsonObject, Track.class);
+
+                prevActivity = extras.getString("prevActivity");
             }
         }
 
         initComponent();
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if(prevActivity!=null){
+            if(prevActivity.equals("Tracking")){
+                Intent i = new Intent(this, MainActivity.class);
+                startActivity(i);
+            }
+        }
+    }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        if(!track.getLatlngs().isEmpty()){
+        if(!track.getLatLngs().isEmpty()){
             //set starting & endingpoint
             LatLng start = new LatLng(track.getStartLocationLat(), track.getStartLocationLong());
             mMap.addMarker( new MarkerOptions().position(start));
@@ -70,7 +93,7 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
 
             //setting zoom to fit all markers
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
-            for(LatLng l:track.getLatlngs()){
+            for(LatLng l:track.getLatLngs()){
                 builder.include(l);
             }
             final int width = getResources().getDisplayMetrics().widthPixels;
@@ -82,7 +105,7 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
             //populating latlngs list to draw route
             Polyline route = mMap.addPolyline(new PolylineOptions()
                     .clickable(true)
-                    .addAll(track.getLatlngs()));
+                    .addAll(track.getLatLngs()));
 
             route.setEndCap(new RoundCap());
             route.setWidth(10);
@@ -90,7 +113,6 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
             route.setJointType(JointType.ROUND);
         }
     }
-
 
     private void initComponent(){
         startDate = findViewById(R.id.track_detailed_startdate_tv);
@@ -108,8 +130,24 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
         distance.setText(track.getFormattedDistance());
         duration.setText(track.getFormattedDuration());
 
-        mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.track_detailed_map);
-        mapFragment.getMapAsync(this);
+        if(googlePlayAvailable) {
+            mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.track_detailed_map);
+            mapFragment.getMapAsync(this);
+        }
     }
+
+
+    private boolean googlePlayAvailable(){
+        GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+        int result = googleAPI.isGooglePlayServicesAvailable(this);
+
+        if(result != ConnectionResult.SUCCESS) {
+            if(googleAPI.isUserResolvableError(result)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

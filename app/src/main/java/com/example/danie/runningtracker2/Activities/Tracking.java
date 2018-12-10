@@ -26,6 +26,8 @@ import com.example.danie.runningtracker2.R;
 import com.example.danie.runningtracker2.Services.LocationService;
 import com.example.danie.runningtracker2.Track;
 import com.example.danie.runningtracker2.Util;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -38,9 +40,6 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Iterator;
 import java.util.List;
 
 public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
@@ -49,30 +48,36 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     private static final String THIS_TRACK = "thisTrack";
     private static final int UNIQUE_ID = 1234;
 
-    Intent intent;
+    Intent serviceIntent;
     IntentFilter filter;
     LocationReceiver locationReceiver;
     NotificationCompat.Builder newNotificationBuilder;
     NotificationManager notificationManager;
 
     static TextView distance;
-    static Chronometer stopWatch;
-    static Button start;
+    Chronometer stopWatch;
+    Button start;
     SupportMapFragment mapFragment;
     GoogleMap mMap;
 
-    boolean serviceRunning = false;
+    static boolean serviceRunning = false;
+    boolean googlePlayAvailable;
 
     Track newTrack;
-    List<LatLng> latlngs = new ArrayList<>();
-    Iterator<LatLng> i = latlngs.iterator();
 
     Gson gson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_tracking);
+
+        googlePlayAvailable = googlePlayAvailable();
+        if(googlePlayAvailable){
+            setContentView(R.layout.activity_tracking);
+        }else{
+            setContentView(R.layout.activity_tracking2);
+        }
+
 
         if (!checkPermissions()) {
             requestPermissions();
@@ -85,47 +90,62 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
         }
     }
 
-    public static void setWatch(){
-        stopWatch.setBase(SystemClock.elapsedRealtime());
-        stopWatch.start();
-    }
 
     private void initComponents() {
         distance = findViewById(R.id.tracking_distance_tv);
         stopWatch = findViewById(R.id.tracking_duration_chr);
         start = findViewById(R.id.tracking_start_btn);
-        mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.track_detailed_map);
-        mapFragment.getMapAsync(this);
+
+        if(googlePlayAvailable){
+            mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.track_detailed_map);
+            mapFragment.getMapAsync(this);
+        }
 
         start.setOnClickListener((v)->{
             if (!serviceRunning) {
                 //start detecting location
-                start.setText(R.string.stop);
-                intent = new Intent(getApplicationContext(), LocationService.class);
-                startService(intent);
+                serviceIntent = new Intent(getApplicationContext(), LocationService.class);
+                startService(serviceIntent);
 
-                serviceRunning = true;
+                newTrack = new Track();
             } else {
                 //stop detecting location
-                start.setText(R.string.start);
-                stopService(intent);
-                stopWatch.stop();
+                newTrack.wrapUp();
+                stopService(serviceIntent);
                 notificationManager.cancel(UNIQUE_ID);
+                serviceRunning = false;
+
+                //set ui
+                stopWatch.stop();
+                start.setText(R.string.start);
 
                 uploadToDB(newTrack);
 
                 //open detailed view
                 Intent i = new Intent(this, ViewTrackDetailed.class);
                 String jsonObject = gson.toJson(newTrack);
-
                 i.putExtra(TracksProvider.JSON_OBJECT, jsonObject);
+                i.putExtra("prevActivity", "Tracking");
                 startActivity(i);
-
-                serviceRunning = false;
             }
         });
-        start.performClick();
+
+        if(!serviceRunning){
+            start.performClick();
+        }
+    }
+
+    private boolean googlePlayAvailable(){
+        GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+        int result = googleAPI.isGooglePlayServicesAvailable(this);
+
+        if(result != ConnectionResult.SUCCESS) {
+            if(googleAPI.isUserResolvableError(result)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -134,35 +154,39 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     }
 
     private void redrawRoute(){
+        if(googlePlayAvailable) {
+            List<LatLng> LatLngs = newTrack.getLatLngs();
+            if (!LatLngs.isEmpty()) {
 
-        if(!latlngs.isEmpty()){
-            mMap.clear();
+                mMap.clear();
 
-            //set starting point
-            LatLng here = new LatLng(newTrack.getEndLocationLat(), newTrack.getEndLocationLong());
-            mMap.addMarker(new MarkerOptions().position(here).title(THIS_TRACK));
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(here));
-            mMap.animateCamera(CameraUpdateFactory.zoomTo( 15.0f ));
+                //set starting point
+                LatLng start = LatLngs.get(0);
+                mMap.addMarker(new MarkerOptions().position(start).title(THIS_TRACK));
 
-            //populating latlngs list to draw route
-            Polyline route = mMap.addPolyline(new PolylineOptions()
-                    .clickable(true)
-                    .addAll(latlngs));
-            route.setTag(THIS_TRACK);
+                //set current point
+                LatLng here = LatLngs.get(LatLngs.size()-1);
+                mMap.addMarker(new MarkerOptions().position(start).title(THIS_TRACK));
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(here));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(20.0f));
 
-            route.setEndCap(new RoundCap());
-            route.setWidth(10);
-            route.setColor(getResources().getColor(R.color.colorAccent));
-            route.setJointType(JointType.ROUND);
+                //populating latlngs list to draw route
+                Polyline route = mMap.addPolyline(new PolylineOptions()
+                        .clickable(true)
+                        .addAll(LatLngs));
+                route.setTag(THIS_TRACK);
+
+                route.setEndCap(new RoundCap());
+                route.setWidth(10);
+                route.setColor(getResources().getColor(R.color.colorAccent));
+                route.setJointType(JointType.ROUND);
+            }
         }
     }
 
     private boolean uploadToDB(Track track){
         ContentValues values = new ContentValues();
         gson = new Gson();
-
-
-        newTrack.setDuration(Calendar.getInstance());
 
         try{
             values.put(TracksProvider.JSON_OBJECT, gson.toJson(track));
@@ -176,27 +200,29 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     }
 
     public class LocationReceiver extends BroadcastReceiver {
-        Gson gson = new Gson();
-        Double distance;
 
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "onReceive: "+intent.getAction());
 
             if(intent.getAction().equals(filter.getAction(0))){
-                String json = intent.getStringExtra(LocationService.TRACK);
-                newTrack = gson.fromJson(json, Track.class);
-                latlngs.add(new LatLng(newTrack.getEndLocationLat(), newTrack.getEndLocationLong()));
+                Double loclat = intent.getDoubleExtra(LocationService.LOC_LAT, 0.0f);
+                Double loclong = intent.getDoubleExtra(LocationService.LOC_LONG, 0.0f);
 
-                //setting track object variables
-                newTrack.setName(newTrack.getFormattedDistance()+" on "+newTrack.getStartDate());
-                newTrack.setLatlngs(latlngs);
+                newTrack.updateTrack(loclat, loclong);
 
-                distance= newTrack.getDistance();
+
+                //set ui
+                if(newTrack.getLocations().size()==1){
+                    stopWatch.setBase(SystemClock.elapsedRealtime());
+                }
+                stopWatch.start();
+                start.setText(R.string.stop);
                 Tracking.distance.setText(newTrack.getFormattedDistance());
                 redrawRoute();
                 startNotification();
 
+                serviceRunning = true;
             }else{
                 Log.d(TAG, "onReceive: Error");
             }
@@ -217,7 +243,6 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
     }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);

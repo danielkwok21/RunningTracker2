@@ -3,6 +3,7 @@ package com.example.danie.runningtracker2.Services;
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -13,18 +14,12 @@ import android.provider.Settings;
 import android.util.Log;
 
 import com.example.danie.runningtracker2.Activities.Tracking;
-import com.example.danie.runningtracker2.Track;
 import com.example.danie.runningtracker2.Util;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 
 public class LocationService extends Service {
     private static final String TAG = "LocationService";
-    public static final String TRACK = "newTrack";
+    public static final String LOC_LAT = "location_latitude";
+    public static final String LOC_LONG = "location_longitude";
 
     private IBinder locationServiceBinder;
     private Intent broadcastIntent;
@@ -57,41 +52,23 @@ public class LocationService extends Service {
         Log.d(TAG, "startLocationService: ");
 
         locationListener = new LocationListener() {
-
-            boolean firstCall=true;
-            Location currentLocation;
             Location prevLocation;
-            Location startLocation;
-            double calcDistance=0;
-
-            Track newTrack;
-            Gson gson = new Gson();
-
+            boolean firstCall = true;
             @Override
             public void onLocationChanged(Location location) {
-                Log.d(TAG, "onLocationChanged: ");
-                currentLocation = location;
 
                 if(firstCall){
-                    Tracking.setWatch();
-                    startLocation = currentLocation;
-                    prevLocation = currentLocation;
+                    prevLocation = location;
                     firstCall = false;
                 }
 
-                calcDistance = calcDistance+prevLocation.distanceTo(currentLocation);
-
-                prevLocation = location;
-
-                Log.d(TAG, "onLocationChanged: calcDistance: "+calcDistance);
-
-                //creating new track object
-                newTrack = new Track(startLocation, currentLocation, calcDistance, Calendar.getInstance());
+                Log.d(TAG, "onLocationChanged: Lat: "+location.getLatitude()+"|Long: "+location.getLongitude());
 
                 //broadcasts info
                 broadcastIntent = new Intent();
                 broadcastIntent.setAction(Tracking.BROADCAST_ACTION);
-                broadcastIntent.putExtra(TRACK, gson.toJson(newTrack));
+                broadcastIntent.putExtra(LOC_LAT, location.getLatitude());
+                broadcastIntent.putExtra(LOC_LONG, location.getLongitude());
                 sendBroadcast(broadcastIntent);
             }
 
@@ -115,28 +92,15 @@ public class LocationService extends Service {
             }
         };
 
-        locationManager = (LocationManager)getApplicationContext().getSystemService(LOCATION_SERVICE);
-        List<String> providers = locationManager.getProviders(true);
-        Location bestLocation = null;
-        for (String provider : providers) {
-            Location loc = locationManager.getLastKnownLocation(provider);
-            if (loc == null) {
-                continue;
-            }
-            if (bestLocation == null || loc.getAccuracy() < bestLocation.getAccuracy()) {
-                // Found best last known location: %s", l);
-                bestLocation = loc;
-            }
-        }
-        
-        if(bestLocation!=null){
-            locationListener.onLocationChanged(bestLocation);            
+        locationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
+        locationManager.requestLocationUpdates(locationManager.getBestProvider(new Criteria(), false), 0, 0, locationListener);
+        Location x = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if(x!=null){
+            locationListener.onLocationChanged(x);
         }else{
-            Util.Toast(this, "Last known location cannot be found");
+            Util.Toast(this, "Cannot detect current location");
         }
-
     }
-
 
     @Override
     public IBinder onBind(Intent intent) {
