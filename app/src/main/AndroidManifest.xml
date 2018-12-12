@@ -24,9 +24,9 @@
         <activity android:name=".Activities.ViewTracks" />
 
         <service
-            android:name=".Services.LocationService"
+            android:name=".Services.AndroidLocationService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true"/>
 
         <receiver android:name=".Activities.Tracking$LocationReceiver" />
 

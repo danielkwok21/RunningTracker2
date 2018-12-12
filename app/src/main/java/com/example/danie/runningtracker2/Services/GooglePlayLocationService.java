@@ -1,6 +1,7 @@
 package com.example.danie.runningtracker2.Services;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -21,12 +22,10 @@ import com.example.danie.runningtracker2.Track;
 import com.example.danie.runningtracker2.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.gson.Gson;
 
 public class GooglePlayLocationService extends Service implements GoogleApiClient.ConnectionCallbacks,
@@ -40,14 +39,14 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
 
     private LocationRequest locationRequest;
     private GoogleApiClient googleApiClient;
-
-    Track newTrack;
+    private Track newTrack;
 
     public GooglePlayLocationService() {
     }
 
     @Override
     public void onCreate() {
+        Log.d(TAG, "onCreate: ");
         super.onCreate();
 
         googleApiClient = new GoogleApiClient.Builder(this)
@@ -55,20 +54,22 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
+        newTrack = new Track();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand: ");
-        googlePlayLocationServiceBinder = new GooglePlayLocationServiceBinder();
+        googlePlayLocationServiceBinder = new ServiceBinder();
         googleApiClient.connect();
-        newTrack = new Track();
 
+        startForeground(UNIQUE_ID, createNotification(""));
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
+        Log.d(TAG, "onDestroy: ");
         super.onDestroy();
         notificationManager.cancel(UNIQUE_ID);
         if(googleApiClient.isConnected()){
@@ -76,27 +77,22 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
                     .removeLocationUpdates(googleApiClient, this);
             googleApiClient.disconnect();
         }
-
     }
 
-    private void startNotification(){
-        NotificationCompat.Builder newNotificationBuilder;
+    private Notification createNotification(String distance){
         Intent intent = new Intent(this, Tracking.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
-        //builds the body of the notification itself
-        newNotificationBuilder = new NotificationCompat.Builder(this);
-        newNotificationBuilder.setSmallIcon(R.drawable.icon)
-                .setContentTitle("Distance covered: "+newTrack.getFormattedDistance())
-                .setContentText("Duration: "+newTrack.getFormattedDuration())
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(false);
 
-        //sends notification to phone
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(UNIQUE_ID, newNotificationBuilder.build());
+
+        builder.setSmallIcon(R.drawable.icon)
+                .setContentTitle("Distance covered: "+distance)
+                .setContentIntent(pendingIntent);
+
+        return builder.build();
     }
 
     @SuppressLint("MissingPermission")
@@ -108,13 +104,11 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
 
         long UPDATE_INTERVAL = 5000;  /* 5 secs */
         long FASTEST_INTERVAL = 1000; /* 1 secs */
-        startNotification();
 
         locationRequest = new LocationRequest();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(UPDATE_INTERVAL);
         locationRequest.setFastestInterval(FASTEST_INTERVAL);
-        locationRequest.setSmallestDisplacement(1);
 
         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
     }
@@ -140,7 +134,8 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
         Gson gson = new Gson();
         if(location!=null){
             newTrack.updateTrack(location);
-            Log.d(TAG, "onLocationChanged: Lat: "+location.getLatitude()+"|Long: "+location.getLongitude());
+            Log.d(TAG, "onLocationChanged: "+newTrack.getFormattedDistance()+"|"+newTrack.getLatLngs().size());
+//            Log.d(TAG, "onLocationChanged: Lat: "+location.getLatitude()+"|Long: "+location.getLongitude());
 
             //broadcasts Track object
             broadcastIntent = new Intent();
@@ -149,15 +144,16 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
 
             sendBroadcast(broadcastIntent);
 
-            Util.Toast(this, "Distance: "+newTrack.getDistance());
+            Util.Toast(this, "Distance: "+newTrack.getFormattedDistance()+"latlang size: "+ newTrack.getLatLngs().size());
+            notificationManager.notify(UNIQUE_ID, createNotification(newTrack.getFormattedDistance()));
         }else{
             Log.d(TAG, "onLocationChanged: location is null");
         }
     }
 
-    public class GooglePlayLocationServiceBinder extends Binder {
-        public GooglePlayLocationServiceBinder getService(){
-            return GooglePlayLocationServiceBinder.this;
+    public class ServiceBinder extends Binder {
+        public GooglePlayLocationService getService(){
+            return GooglePlayLocationService.this;
         }
     }
 }

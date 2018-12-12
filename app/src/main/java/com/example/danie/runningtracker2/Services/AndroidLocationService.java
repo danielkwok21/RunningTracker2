@@ -14,8 +14,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -23,16 +21,10 @@ import com.example.danie.runningtracker2.Activities.Tracking;
 import com.example.danie.runningtracker2.R;
 import com.example.danie.runningtracker2.Track;
 import com.example.danie.runningtracker2.Util;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.gson.Gson;
 
-import java.util.concurrent.Executor;
-
-public class LocationService extends Service{
-    private static final String TAG = "LocationService";
+public class AndroidLocationService extends Service{
+    private static final String TAG = "AndroidLocationService";
     public static final String NEW_TRACK = "newTrack";
     private static final int UNIQUE_ID = 1234;
 
@@ -45,7 +37,7 @@ public class LocationService extends Service{
 
     Track newTrack;
 
-    public LocationService() {
+    public AndroidLocationService() {
     }
 
     @Override
@@ -55,7 +47,7 @@ public class LocationService extends Service{
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        locationServiceBinder = new LocationServiceBinder();
+        locationServiceBinder = new ServiceBinder();
 
         startLocationService();
 
@@ -149,9 +141,9 @@ public class LocationService extends Service{
     }
 
 
-    public class LocationServiceBinder extends Binder {
-        public LocationService getService(){
-            return LocationService.this;
+    public class ServiceBinder extends Binder {
+        public AndroidLocationService getService(){
+            return AndroidLocationService.this;
         }
     }
 }

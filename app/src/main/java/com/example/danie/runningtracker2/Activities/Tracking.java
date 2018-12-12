@@ -2,11 +2,14 @@ package com.example.danie.runningtracker2.Activities;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -20,8 +23,8 @@ import android.widget.TextView;
 
 import com.example.danie.runningtracker2.ContentProviders.TracksProvider;
 import com.example.danie.runningtracker2.R;
+import com.example.danie.runningtracker2.Services.AndroidLocationService;
 import com.example.danie.runningtracker2.Services.GooglePlayLocationService;
-import com.example.danie.runningtracker2.Services.LocationService;
 import com.example.danie.runningtracker2.Track;
 import com.example.danie.runningtracker2.Util;
 import com.google.android.gms.common.ConnectionResult;
@@ -49,6 +52,8 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     Intent serviceIntent;
     IntentFilter filter;
     LocationReceiver locationReceiver;
+    GooglePlayLocationService googlePlayLocationService;
+    AndroidLocationService androidLocationService;
 
     static TextView distance;
     Chronometer stopWatch;
@@ -56,11 +61,11 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     SupportMapFragment mapFragment;
     GoogleMap mMap;
 
-    static boolean serviceRunning = false;
+//    static boolean serviceRunning = false;
     boolean isGooglePlayAvailable;
 
     Track newTrack = null;
-
+    boolean serviceBounded = false;
     Gson gson = new Gson();
 
     @Override
@@ -74,7 +79,6 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             setContentView(R.layout.activity_tracking2);
         }
 
-
         if (!checkPermissions()) {
             requestPermissions();
         } else {
@@ -83,6 +87,16 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             locationReceiver = new LocationReceiver();
             registerReceiver(locationReceiver, filter);
             initComponents();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(serviceBounded){
+            unbindService(connection);
+            Log.d(TAG, "onDestroy: Unbound service");
+            serviceBounded = false;
         }
     }
 
@@ -98,21 +112,23 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
         }
 
         start.setOnClickListener((v)->{
-
-            if (!serviceRunning) {
-                //start detecting location
+            if (!serviceBounded) {
                 if(isGooglePlayAvailable){
                     serviceIntent = new Intent(getApplicationContext(), GooglePlayLocationService.class);
                 }else{
-                    serviceIntent = new Intent(getApplicationContext(), LocationService.class);
+                    serviceIntent = new Intent(getApplicationContext(), AndroidLocationService.class);
                 }
                 startService(serviceIntent);
+                bindService(serviceIntent, connection, BIND_AUTO_CREATE);
+
+                serviceBounded = true;
             } else {
                 try{
                     //stop detecting location
                     newTrack.wrapUp();
+                    unbindService(connection);
                     stopService(serviceIntent);
-                    serviceRunning = false;
+                    serviceBounded = false;
 
                     //set ui
                     stopWatch.stop();
@@ -132,7 +148,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             }
         });
 
-        if(!serviceRunning){
+        if(!serviceBounded){
             start.performClick();
         }
     }
@@ -206,7 +222,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
         @Override
         public void onReceive(Context context, Intent intent) {
                 if(intent.getAction().equals(filter.getAction(0))){
-                    String json = intent.getStringExtra(LocationService.NEW_TRACK);
+                    String json = intent.getStringExtra(AndroidLocationService.NEW_TRACK);
                     newTrack = gson.fromJson(json, Track.class);
 
                     if(newTrack!=null) {
@@ -220,7 +236,9 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                         Tracking.distance.setText(newTrack.getFormattedDistance());
                         redrawRoute();
 
-                        serviceRunning = true;
+                        Log.d(TAG, "onReceive: "+newTrack.getFormattedDistance());
+
+                        serviceBounded = true;
                     }else {
                         Log.d(TAG, "onReceive: newTrack is null");
                     }
@@ -230,6 +248,32 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             }
         }
 
+    ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            serviceBounded = true;
+            Util.Toast(getApplicationContext(), "service connected");
+            if(isGooglePlayAvailable){
+                GooglePlayLocationService.ServiceBinder binder = (GooglePlayLocationService.ServiceBinder) service;
+                googlePlayLocationService = binder.getService();
+            }else{
+                AndroidLocationService.ServiceBinder binder = (AndroidLocationService.ServiceBinder) service;
+                androidLocationService = binder.getService();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            serviceBounded = false;
+            Util.Toast(getApplicationContext(), "service disconnected");
+            Log.d(TAG, "onServiceDisconnected: ");
+            if(isGooglePlayAvailable){
+                googlePlayLocationService = null;
+            }else{
+                androidLocationService = null;
+            }
+        }
+    };
 
     private boolean checkPermissions() {
         return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
