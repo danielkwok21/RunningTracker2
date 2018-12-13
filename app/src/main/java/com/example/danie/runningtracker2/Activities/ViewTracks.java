@@ -1,7 +1,7 @@
 package com.example.danie.runningtracker2.Activities;
 
 import android.content.ContentResolver;
-import android.database.ContentObserver;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.widget.Button;
 
 import com.example.danie.runningtracker2.Adapters.TracksRecyclerAdapter;
 import com.example.danie.runningtracker2.ContentProviders.TracksProvider;
@@ -27,7 +28,8 @@ public class ViewTracks extends AppCompatActivity {
     TracksRecyclerAdapter tracksRecyclerAdapter;
     ContentResolver contentResolver;
 
-    Gson gson;
+    Button distanceToday;
+    Gson gson = new Gson();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,16 +39,24 @@ public class ViewTracks extends AppCompatActivity {
         contentResolver = getApplicationContext().getContentResolver();
 
         initRecyclerView(getTracksFromProvider());
+        initComponents();
     }
 
+    private void initComponents(){
+        distanceToday = findViewById(R.id.tracks_view_today_stats);
+
+        distanceToday.setOnClickListener((v)->{
+            Intent i = new Intent(this, TodayStats.class);
+            startActivity(i);
+        });
+    }
 
     private List<Track> getTracksFromProvider(){
         Uri uri = TracksProvider.CONTENT_URL;
         Cursor c = contentResolver.query(uri, null, null, null, TracksProvider.ID);
         Track track;
-
         List<Track> tracks = new ArrayList<>();
-        gson = new Gson();
+
 
         if(c!=null){
             if(c.moveToFirst()){
@@ -75,7 +85,7 @@ public class ViewTracks extends AppCompatActivity {
     }
 
     private void initRecyclerView(List<Track> tracks){
-        recyclerView = findViewById(R.id.logs_view_log_rv);
+        recyclerView = findViewById(R.id.tracks_view_tracks_rv);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 

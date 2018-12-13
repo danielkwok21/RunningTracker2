@@ -26,7 +26,7 @@
         <service
             android:name=".Services.AndroidLocationService"
             android:enabled="true"
-            android:exported="true"/>
+            android:exported="true" />
 
         <receiver android:name=".Activities.Tracking$LocationReceiver" />
 
@@ -50,7 +50,9 @@
         <service
             android:name=".Services.GooglePlayLocationService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
+
+        <activity android:name=".Activities.TodayStats"></activity>
     </application>
 
 </manifest>

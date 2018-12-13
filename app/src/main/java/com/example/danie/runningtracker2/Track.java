@@ -30,6 +30,8 @@ public class Track{
     private Double distance=0.0d;
     private long duration =0;
     private Calendar startNow;
+    private Calendar endNow;
+
     private List<LatLng> latlngs = new ArrayList<>();
 
     public Track(){
@@ -151,6 +153,11 @@ public class Track{
         return sdf.format(d);
     }
 
+    public Calendar getStartNow() {
+        return startNow;
+    }
 
-
+    public Calendar getEndNow() {
+        return endNow;
+    }
 }

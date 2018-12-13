@@ -1,6 +1,7 @@
 package com.example.danie.runningtracker2.Services;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -48,7 +49,7 @@ public class AndroidLocationService extends Service{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         locationServiceBinder = new ServiceBinder();
-
+        startForeground(UNIQUE_ID, createNotification(""));
         startLocationService();
 
         return START_STICKY;
@@ -66,7 +67,6 @@ public class AndroidLocationService extends Service{
     private void startLocationService() {
         Log.d(TAG, "startLocationService: ");
         newTrack = new Track();
-        startNotification();
 
         locationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
         locationListener = new LocationListener() {
@@ -76,6 +76,8 @@ public class AndroidLocationService extends Service{
                 Gson gson = new Gson();
 
                 newTrack.updateTrack(location);
+                notificationManager.notify(UNIQUE_ID, createNotification(newTrack.getFormattedDistance()));
+
                 Log.d(TAG, "onLocationChanged: Lat: "+location.getLatitude()+"|Long: "+location.getLongitude());
 
                 //broadcasts Track object
@@ -115,24 +117,20 @@ public class AndroidLocationService extends Service{
         }
     }
 
-    private void startNotification(){
-        NotificationCompat.Builder newNotificationBuilder;
+    private Notification createNotification(String distance){
         Intent intent = new Intent(this, Tracking.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
-        //builds the body of the notification itself
-        newNotificationBuilder = new NotificationCompat.Builder(this);
-        newNotificationBuilder.setSmallIcon(R.drawable.icon)
-                .setContentTitle("Distance covered: "+newTrack.getFormattedDistance())
-                .setContentText("Duration: "+newTrack.getFormattedDuration())
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(false);
 
-        //sends notification to phone
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(UNIQUE_ID, newNotificationBuilder.build());
+
+        builder.setSmallIcon(R.drawable.icon)
+                .setContentTitle("Distance covered: "+distance)
+                .setContentIntent(pendingIntent);
+
+        return builder.build();
     }
 
     @Override
