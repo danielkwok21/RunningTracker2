@@ -41,27 +41,26 @@ public class Track{
     }
 
     public void updateTrack(Location location){
-        LatLng currentLatLng;
-        Location currentLocation;
+        LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+        Location currentLocation = getLocationFromLatLng(currentLatLng);
         LatLng prevLatLng;
         Location prevLocation;
 
-        currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-        currentLocation = getLocationFromLatLng(currentLatLng);
-
+        //if this is the first latlng
         if(latlngs.size()==0){
-            //if this is the first latlng
             prevLatLng = currentLatLng;
             startLatLng = currentLatLng;
         }else{
-            //get the thus far latest latlng
             prevLatLng = latlngs.get(latlngs.size()-1);
         }
         prevLocation = getLocationFromLatLng(prevLatLng);
 
         latlngs.add(currentLatLng);
 
+        //set thus far distance and duration
         distance = distance+prevLocation.distanceTo(currentLocation);
+        duration = Calendar.getInstance().getTime().getTime() - startNow.getTime().getTime();
+
         Log.d(TAG, "updateTrack: distance="+distance);
         name = getFormattedDistance()+" on "+getStartDate();
     }
@@ -141,6 +140,23 @@ public class Track{
 
     public List<LatLng> getLatLngs() {
         return latlngs;
+    }
+
+    public double getSpeed(){
+        return distance/duration;
+    }
+
+    public String getFormattedSpeed(){
+        double speed;
+        double km;
+        double hour;
+
+        //convert to km
+        km = distance/1000;
+        hour = duration*0.0000036;
+        speed = km/hour;
+
+        return String.format("%.3f", speed)+"km/h";
     }
 
     private String getFormattedTime(Date d){

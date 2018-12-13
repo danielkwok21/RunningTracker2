@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 
 import com.example.danie.runningtracker2.Adapters.TracksRecyclerAdapter;
@@ -18,18 +19,19 @@ import com.example.danie.runningtracker2.Track;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import static android.view.View.VISIBLE;
 
 public class ViewTracks extends AppCompatActivity {
     private static final String TAG = "ViewTracks";
 
-    RecyclerView recyclerView;
-    RecyclerView.LayoutManager layoutManager;
-    TracksRecyclerAdapter tracksRecyclerAdapter;
-    ContentResolver contentResolver;
+    private ContentResolver contentResolver;
 
-    Button distanceToday;
-    Gson gson = new Gson();
+    private Button stats;
+    private Gson gson = new Gson();
+    private List<Track> tracks;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,17 +40,23 @@ public class ViewTracks extends AppCompatActivity {
 
         contentResolver = getApplicationContext().getContentResolver();
 
-        initRecyclerView(getTracksFromProvider());
+        tracks = getTracksFromProvider();
+        initRecyclerView(tracks);
         initComponents();
     }
 
     private void initComponents(){
-        distanceToday = findViewById(R.id.tracks_view_today_stats);
+        stats = findViewById(R.id.tracks_view_today_stats);
+        if(!tracks.isEmpty()){
+            stats.setVisibility(VISIBLE);
+            stats.setOnClickListener((v)->{
+                Intent i = new Intent(this, Stats.class);
+                startActivity(i);
+            });
+        }else{
+            stats.setVisibility(View.INVISIBLE);
+        }
 
-        distanceToday.setOnClickListener((v)->{
-            Intent i = new Intent(this, TodayStats.class);
-            startActivity(i);
-        });
     }
 
     private List<Track> getTracksFromProvider(){
@@ -56,8 +64,6 @@ public class ViewTracks extends AppCompatActivity {
         Cursor c = contentResolver.query(uri, null, null, null, TracksProvider.ID);
         Track track;
         List<Track> tracks = new ArrayList<>();
-
-
         if(c!=null){
             if(c.moveToFirst()){
                 do{
@@ -81,15 +87,16 @@ public class ViewTracks extends AppCompatActivity {
             c.close();
         }
 
+        Collections.reverse(tracks);
         return tracks;
     }
 
     private void initRecyclerView(List<Track> tracks){
-        recyclerView = findViewById(R.id.tracks_view_tracks_rv);
-        layoutManager = new LinearLayoutManager(this);
+        RecyclerView recyclerView = findViewById(R.id.tracks_view_rv);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        tracksRecyclerAdapter = new TracksRecyclerAdapter(tracks);
+        TracksRecyclerAdapter tracksRecyclerAdapter = new TracksRecyclerAdapter(tracks);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(tracksRecyclerAdapter);
     }

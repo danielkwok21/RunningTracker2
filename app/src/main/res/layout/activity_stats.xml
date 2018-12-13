@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activities.Stats">
+
+    <Button
+        android:id="@+id/stats_today_filter_btn"
+        android:layout_width="88dp"
+        android:layout_height="37dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="8dp"
+        android:text="Today"
+        android:textSize="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/stats_tomonth_filter_btn"
+        android:layout_width="149dp"
+        android:layout_height="37dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginEnd="50dp"
+        android:text="This Month"
+        android:textSize="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/stats_today_filter_btn" />
+
+    <TextView
+        android:id="@+id/stats_total_distance_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="8dp"
+        android:text="Total Distance:"
+        android:textColor="@color/matteblack"
+        android:textSize="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stats_today_filter_btn" />
+
+    <TextView
+        android:id="@+id/stats_distance_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="distance"
+        android:textSize="10dp"
+        app:layout_constraintEnd_toEndOf="@+id/stats_total_distance_label"
+        app:layout_constraintStart_toStartOf="@+id/stats_total_distance_label"
+        app:layout_constraintTop_toBottomOf="@+id/stats_total_distance_label" />
+
+    <TextView
+        android:id="@+id/stats_ave_distance_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="Average Distance:"
+        android:textSize="20dp"
+        android:textColor="@color/matteblack"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stats_distance_tv" />
+    <TextView
+        android:id="@+id/tats_ave_distance_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="ave_distance"
+        android:textSize="10dp"
+        app:layout_constraintEnd_toEndOf="@+id/stats_ave_distance_label"
+        app:layout_constraintStart_toStartOf="@+id/stats_ave_distance_label"
+        app:layout_constraintTop_toBottomOf="@+id/stats_ave_distance_label" />
+
+
+    <TextView
+        android:id="@+id/stats_best_track_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="Best track"
+        android:textSize="20dp"
+        android:textColor="@color/matteblack"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tats_ave_distance_tv" />
+
+    <TextView
+        android:id="@+id/stats_best_track_date_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="DATE"
+        android:textSize="10dp"
+        app:layout_constraintEnd_toEndOf="@+id/stats_best_track_label"
+        app:layout_constraintStart_toStartOf="@+id/stats_best_track_label"
+        app:layout_constraintTop_toBottomOf="@+id/stats_best_track_label" />
+
+    <TextView
+        android:id="@+id/stats_best_distance_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="DISTANCE"
+        android:textSize="10dp"
+        app:layout_constraintEnd_toStartOf="@+id/stats_best_speed_tv"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/track_detailed_map" />
+
+    <TextView
+        android:id="@+id/stats_best_time_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="00:00"
+        android:textSize="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/stats_best_speed_tv"
+        app:layout_constraintTop_toBottomOf="@+id/track_detailed_map" />
+
+    <TextView
+        android:id="@+id/stats_best_speed_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="SPEED"
+        android:textSize="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/track_detailed_map" />
+
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/track_detailed_map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="243dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="72dp"
+        map:layout_constraintBottom_toBottomOf="parent"
+        map:layout_constraintEnd_toEndOf="parent"
+        map:layout_constraintHorizontal_bias="0.0"
+        map:layout_constraintStart_toStartOf="parent"
+        map:layout_constraintTop_toBottomOf="@+id/stats_best_track_date_tv"
+        map:layout_constraintVertical_bias="0.0"
+        tools:context=".Activities.MapsActivity" />
+
+</android.support.constraint.ConstraintLayout>

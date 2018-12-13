@@ -9,7 +9,7 @@
     tools:context="com.example.danie.runningtracker2.Activities.MainActivity">
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/tracks_view_tracks_rv"
+        android:id="@+id/tracks_view_rv"
         android:layout_width="match_parent"
         android:layout_height="470dp"
         android:layout_marginStart="8dp"
@@ -29,9 +29,12 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Button"
+        android:layout_marginEnd="8dp"
+        android:text="Breakdown"
+        android:textSize="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tracks_view_tracks_rv" />
+        app:layout_constraintTop_toBottomOf="@+id/tracks_view_rv" />
 
 
 </android.support.constraint.ConstraintLayout>

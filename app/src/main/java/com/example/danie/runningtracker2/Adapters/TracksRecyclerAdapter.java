@@ -24,8 +24,13 @@ public class TracksRecyclerAdapter extends RecyclerView.Adapter<TracksRecyclerAd
     private List<Track> tracks;
 
     public TracksRecyclerAdapter(List<Track> tracks){
-        Collections.reverse(tracks);
         this.tracks = tracks;
+    }
+
+    public void updateData(List<Track> newTracks){
+        tracks.clear();
+        tracks.addAll(newTracks);
+        notifyDataSetChanged();
     }
 
     @NonNull

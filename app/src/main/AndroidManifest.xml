@@ -52,7 +52,7 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".Activities.TodayStats"></activity>
+        <activity android:name=".Activities.Stats"></activity>
     </application>
 
 </manifest>

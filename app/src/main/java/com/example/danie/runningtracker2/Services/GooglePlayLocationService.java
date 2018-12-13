@@ -11,10 +11,12 @@ import android.location.Location;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Chronometer;
 
 import com.example.danie.runningtracker2.Activities.Tracking;
 import com.example.danie.runningtracker2.R;
@@ -36,9 +38,9 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
 
     private IBinder googlePlayLocationServiceBinder;
     private NotificationManager notificationManager;
-
     private LocationRequest locationRequest;
     private GoogleApiClient googleApiClient;
+    private Chronometer stopWatch;
     private Track newTrack;
 
     public GooglePlayLocationService() {
@@ -54,9 +56,18 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
-        newTrack = new Track();
-    }
 
+        newTrack = new Track();
+        stopWatch = new Chronometer(this);
+        stopWatch.setBase(SystemClock.elapsedRealtime());
+        stopWatch.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
+            @Override
+            public void onChronometerTick(Chronometer chronometer) {
+                Log.d(TAG, "onChronometerTick: Tick");
+            }
+        });
+        stopWatch.start();
+    }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand: ");
@@ -134,17 +145,14 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
         Gson gson = new Gson();
         if(location!=null){
             newTrack.updateTrack(location);
-            Log.d(TAG, "onLocationChanged: "+newTrack.getFormattedDistance()+"|"+newTrack.getLatLngs().size());
-//            Log.d(TAG, "onLocationChanged: Lat: "+location.getLatitude()+"|Long: "+location.getLongitude());
 
             //broadcasts Track object
             broadcastIntent = new Intent();
-            broadcastIntent.setAction(Tracking.BROADCAST_ACTION);
+            broadcastIntent.setAction(Tracking.GET_LOCATION);
             broadcastIntent.putExtra(NEW_TRACK, gson.toJson(newTrack));
 
             sendBroadcast(broadcastIntent);
 
-            Util.Toast(this, "Distance: "+newTrack.getFormattedDistance()+"latlang size: "+ newTrack.getLatLngs().size());
             notificationManager.notify(UNIQUE_ID, createNotification(newTrack.getFormattedDistance()));
         }else{
             Log.d(TAG, "onLocationChanged: location is null");

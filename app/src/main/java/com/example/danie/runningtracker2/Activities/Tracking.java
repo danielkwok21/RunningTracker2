@@ -10,7 +10,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -45,8 +44,8 @@ import java.util.List;
 
 public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     private static final String TAG = "Tracking";
-    public static final String BROADCAST_ACTION = "getLocation";
-    public static final String GOOGLE_PLAY_SERVICES = "GooglePlayServices";
+    public static final String GET_LOCATION = "getLocation";
+    public static final String GET_TIME = "getTime";
     private static final String THIS_TRACK = "thisTrack";
 
     Intent serviceIntent;
@@ -55,13 +54,12 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     GooglePlayLocationService googlePlayLocationService;
     AndroidLocationService androidLocationService;
 
-    static TextView distance;
-    Chronometer stopWatch;
+    TextView distance;
+    TextView stopWatch;
     Button start;
     SupportMapFragment mapFragment;
     GoogleMap mMap;
 
-//    static boolean serviceRunning = false;
     boolean isGooglePlayAvailable;
 
     Track newTrack = null;
@@ -83,7 +81,8 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             requestPermissions();
         } else {
             filter = new IntentFilter();
-            filter.addAction(BROADCAST_ACTION);
+            filter.addAction(GET_LOCATION);
+            filter.addAction(GET_TIME);
             locationReceiver = new LocationReceiver();
             registerReceiver(locationReceiver, filter);
             initComponents();
@@ -131,7 +130,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                     serviceBounded = false;
 
                     //set ui
-                    stopWatch.stop();
+//                    stopWatch.stop();
                     start.setText(R.string.start);
 
                     uploadToDB(newTrack);
@@ -221,30 +220,60 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
 
         @Override
         public void onReceive(Context context, Intent intent) {
-                if(intent.getAction().equals(filter.getAction(0))){
-                    String json = intent.getStringExtra(AndroidLocationService.NEW_TRACK);
-                    newTrack = gson.fromJson(json, Track.class);
 
-                    if(newTrack!=null) {
-                        //set ui
-                        if (firstCall) {
-                            stopWatch.setBase(SystemClock.elapsedRealtime());
-                            firstCall = false;
+                switch(intent.getAction()){
+                    case GET_LOCATION:
+                        String json = intent.getStringExtra(AndroidLocationService.NEW_TRACK);
+                        newTrack = gson.fromJson(json, Track.class);
+
+                        if(newTrack!=null) {
+                            //set ui
+                            if (firstCall) {
+//                            stopWatch.setBase(SystemClock.elapsedRealtime());
+                                firstCall = false;
+                            }
+//                        stopWatch.start();
+                            start.setText(R.string.stop);
+                            distance.setText(newTrack.getFormattedDistance());
+                            redrawRoute();
+
+                            Log.d(TAG, "onReceive: "+newTrack.getFormattedDistance());
+
+                            serviceBounded = true;
+                        }else {
+                            Log.d(TAG, "onReceive: newTrack is null");
                         }
-                        stopWatch.start();
-                        start.setText(R.string.stop);
-                        Tracking.distance.setText(newTrack.getFormattedDistance());
-                        redrawRoute();
-
-                        Log.d(TAG, "onReceive: "+newTrack.getFormattedDistance());
-
-                        serviceBounded = true;
-                    }else {
-                        Log.d(TAG, "onReceive: newTrack is null");
-                    }
-                }else{
-                    Log.d(TAG, "onReceive: filter different");
+                        break;
+                    case GET_TIME:
+                        stopWatch.setText(newTrack.getFormattedDuration());
+                        break;
+                    default:
+                        break;
                 }
+
+//                if(intent.getAction().equals(filter.getAction(0))){
+//                    String json = intent.getStringExtra(AndroidLocationService.NEW_TRACK);
+//                    newTrack = gson.fromJson(json, Track.class);
+//
+//                    if(newTrack!=null) {
+//                        //set ui
+//                        if (firstCall) {
+////                            stopWatch.setBase(SystemClock.elapsedRealtime());
+//                            firstCall = false;
+//                        }
+////                        stopWatch.start();
+//                        stopWatch.setText(newTrack.getFormattedDuration());
+//                        start.setText(R.string.stop);
+//                        distance.setText(newTrack.getFormattedDistance());
+//                        redrawRoute();
+//
+//                        Log.d(TAG, "onReceive: "+newTrack.getFormattedDistance());
+//
+//                        serviceBounded = true;
+//                    }else {
+//                        Log.d(TAG, "onReceive: newTrack is null");
+//                    }
+//                }
             }
         }
 
@@ -298,7 +327,8 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                 Util.Toast(this, "onRequestPermissionsResult: Permission granted");
 
                 filter = new IntentFilter();
-                filter.addAction(BROADCAST_ACTION);
+                filter.addAction(GET_LOCATION);
+                filter.addAction(GET_TIME);
                 locationReceiver = new LocationReceiver();
                 registerReceiver(locationReceiver, filter);
                 initComponents();

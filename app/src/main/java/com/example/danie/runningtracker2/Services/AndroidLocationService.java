@@ -82,7 +82,7 @@ public class AndroidLocationService extends Service{
 
                 //broadcasts Track object
                 broadcastIntent = new Intent();
-                broadcastIntent.setAction(Tracking.BROADCAST_ACTION);
+                broadcastIntent.setAction(Tracking.GET_LOCATION);
                 broadcastIntent.putExtra(NEW_TRACK, gson.toJson(newTrack));
 
                 sendBroadcast(broadcastIntent);

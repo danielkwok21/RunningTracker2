@@ -19,17 +19,29 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Chronometer
+    <!--<Chronometer-->
+        <!--android:id="@+id/tracking_duration_chr"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginEnd="32dp"-->
+        <!--android:gravity="center_horizontal"-->
+        <!--android:textColor="@color/matteblack"-->
+        <!--android:textSize="40dp"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintTop_toTopOf="@+id/tracking_distance_tv" />-->
+
+
+    <TextView
         android:id="@+id/tracking_duration_chr"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="32dp"
         android:gravity="center_horizontal"
+        android:text="00:00"
         android:textColor="@color/matteblack"
         android:textSize="40dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/tracking_distance_tv" />
-
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:map="http://schemas.android.com/apk/res-auto"

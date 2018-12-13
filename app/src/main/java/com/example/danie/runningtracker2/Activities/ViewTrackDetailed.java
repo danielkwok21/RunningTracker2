@@ -26,19 +26,19 @@ import com.google.gson.Gson;
 public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCallback {
     private static final String TAG = "ViewTrackDetailed";
 
-    TextView startDate;
-    TextView endDate;
-    TextView startTime;
-    TextView endTime;
-    TextView distance;
-    TextView duration;
-    GoogleMap mMap;
-    SupportMapFragment mapFragment;
+    private TextView startDate;
+    private TextView endDate;
+    private TextView startTime;
+    private TextView endTime;
+    private TextView distance;
+    private TextView duration;
+    private GoogleMap mMap;
+    private SupportMapFragment mapFragment;
 
-    Track track;
-    Gson gson;
+    private Track track;
+    private Gson gson;
 
-    boolean googlePlayAvailable;
+    private boolean googlePlayAvailable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
