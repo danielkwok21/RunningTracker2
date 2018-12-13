@@ -13,6 +13,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
@@ -23,6 +24,8 @@ import com.example.danie.runningtracker2.R;
 import com.example.danie.runningtracker2.Track;
 import com.example.danie.runningtracker2.Util;
 import com.google.gson.Gson;
+
+import java.util.concurrent.TimeUnit;
 
 public class AndroidLocationService extends Service{
     private static final String TAG = "AndroidLocationService";
@@ -36,7 +39,10 @@ public class AndroidLocationService extends Service{
     private LocationManager locationManager;
     private LocationListener locationListener;
 
-    Track newTrack;
+    private Track newTrack;
+    private Handler stopwatchHandler;
+    private Runnable stopwatchRunnable;
+    private int seconds=0;
 
     public AndroidLocationService() {
     }
@@ -44,7 +50,38 @@ public class AndroidLocationService extends Service{
     @Override
     public void onCreate() {
         super.onCreate();
+
+        startStopwatch();
     }
+
+
+    private void startStopwatch(){
+
+        //preparing timer
+        stopwatchHandler = new Handler();
+        stopwatchRunnable = new Runnable() {
+            Intent broadcastIntent = new Intent();
+
+            @Override
+            public void run() {
+                seconds++;
+
+                String hms = String.format("%02d:%02d:%02d", TimeUnit.SECONDS.toHours(seconds),
+                        TimeUnit.SECONDS.toMinutes(seconds) % TimeUnit.HOURS.toMinutes(1),
+                        TimeUnit.SECONDS.toSeconds(seconds) % TimeUnit.MINUTES.toSeconds(1));
+
+                stopwatchHandler.postDelayed(stopwatchRunnable, 1000);
+
+                broadcastIntent = new Intent();
+                broadcastIntent.setAction(Tracking.GET_TIME);
+                broadcastIntent.putExtra(Tracking.THIS_TIME, hms);
+                sendBroadcast(broadcastIntent);
+            }
+        };
+        stopwatchHandler.post(stopwatchRunnable);
+
+    }
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {

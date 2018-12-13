@@ -102,12 +102,10 @@ public class TracksProvider extends ContentProvider {
         if(rowID>0){
             Uri _uri = ContentUris.withAppendedId(CONTENT_URL, rowID);
             getContext().getContentResolver().notifyChange(_uri, null);
-            Util.Toast(getContext(), "Insertion successful");
 
             return _uri;
         }else{
             Log.d(TAG, "insert: Failed");
-            Util.Toast(getContext(), "Insertion failed");
             return null;
         }
     }

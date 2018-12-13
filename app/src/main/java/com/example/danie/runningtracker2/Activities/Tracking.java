@@ -46,25 +46,26 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     private static final String TAG = "Tracking";
     public static final String GET_LOCATION = "getLocation";
     public static final String GET_TIME = "getTime";
-    private static final String THIS_TRACK = "thisTrack";
+    public static final String THIS_TRACK = "thisTrack";
+    public static final String THIS_TIME = "thisTime";
 
-    Intent serviceIntent;
-    IntentFilter filter;
-    LocationReceiver locationReceiver;
-    GooglePlayLocationService googlePlayLocationService;
-    AndroidLocationService androidLocationService;
+    private Intent serviceIntent;
+    private IntentFilter filter;
+    private LocationReceiver locationReceiver;
+    private GooglePlayLocationService googlePlayLocationService;
+    private AndroidLocationService androidLocationService;
 
-    TextView distance;
-    TextView stopWatch;
-    Button start;
-    SupportMapFragment mapFragment;
-    GoogleMap mMap;
+    private TextView distance;
+    private TextView stopWatch;
+    private Button start;
+    private SupportMapFragment mapFragment;
+    private GoogleMap mMap;
 
-    boolean isGooglePlayAvailable;
+    private boolean isGooglePlayAvailable;
 
-    Track newTrack = null;
-    boolean serviceBounded = false;
-    Gson gson = new Gson();
+    private Track newTrack = null;
+    private boolean serviceBounded = false;
+    private Gson gson = new Gson();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -216,28 +217,18 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     }
 
     public class LocationReceiver extends BroadcastReceiver {
-        private boolean firstCall = true;
-
         @Override
         public void onReceive(Context context, Intent intent) {
 
                 switch(intent.getAction()){
                     case GET_LOCATION:
-                        String json = intent.getStringExtra(AndroidLocationService.NEW_TRACK);
+                        String json = intent.getStringExtra(Tracking.THIS_TRACK);
                         newTrack = gson.fromJson(json, Track.class);
 
                         if(newTrack!=null) {
-                            //set ui
-                            if (firstCall) {
-//                            stopWatch.setBase(SystemClock.elapsedRealtime());
-                                firstCall = false;
-                            }
-//                        stopWatch.start();
                             start.setText(R.string.stop);
                             distance.setText(newTrack.getFormattedDistance());
                             redrawRoute();
-
-                            Log.d(TAG, "onReceive: "+newTrack.getFormattedDistance());
 
                             serviceBounded = true;
                         }else {
@@ -245,35 +236,14 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                         }
                         break;
                     case GET_TIME:
-                        stopWatch.setText(newTrack.getFormattedDuration());
+                        String formattedSeconds = intent.getStringExtra(Tracking.THIS_TIME);
+
+                        stopWatch.setText(formattedSeconds);
                         break;
                     default:
                         break;
                 }
 
-//                if(intent.getAction().equals(filter.getAction(0))){
-//                    String json = intent.getStringExtra(AndroidLocationService.NEW_TRACK);
-//                    newTrack = gson.fromJson(json, Track.class);
-//
-//                    if(newTrack!=null) {
-//                        //set ui
-//                        if (firstCall) {
-////                            stopWatch.setBase(SystemClock.elapsedRealtime());
-//                            firstCall = false;
-//                        }
-////                        stopWatch.start();
-//                        stopWatch.setText(newTrack.getFormattedDuration());
-//                        start.setText(R.string.stop);
-//                        distance.setText(newTrack.getFormattedDistance());
-//                        redrawRoute();
-//
-//                        Log.d(TAG, "onReceive: "+newTrack.getFormattedDistance());
-//
-//                        serviceBounded = true;
-//                    }else {
-//                        Log.d(TAG, "onReceive: newTrack is null");
-//                    }
-//                }
             }
         }
 

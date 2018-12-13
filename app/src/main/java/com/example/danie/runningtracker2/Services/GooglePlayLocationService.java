@@ -10,18 +10,16 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.Chronometer;
 
 import com.example.danie.runningtracker2.Activities.Tracking;
 import com.example.danie.runningtracker2.R;
 import com.example.danie.runningtracker2.Track;
-import com.example.danie.runningtracker2.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -30,18 +28,21 @@ import com.google.android.gms.location.LocationServices;
 
 import com.google.gson.Gson;
 
+import java.util.concurrent.TimeUnit;
+
 public class GooglePlayLocationService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final String TAG = "GPLocationService";
-    public static final String NEW_TRACK = "newTrack";
     private static final int UNIQUE_ID = 1234;
 
     private IBinder googlePlayLocationServiceBinder;
     private NotificationManager notificationManager;
     private LocationRequest locationRequest;
     private GoogleApiClient googleApiClient;
-    private Chronometer stopWatch;
     private Track newTrack;
+    private Handler stopwatchHandler;
+    private Runnable stopwatchRunnable;
+    private int seconds=0;
 
     public GooglePlayLocationService() {
     }
@@ -58,16 +59,37 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
                 .build();
 
         newTrack = new Track();
-        stopWatch = new Chronometer(this);
-        stopWatch.setBase(SystemClock.elapsedRealtime());
-        stopWatch.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
-            @Override
-            public void onChronometerTick(Chronometer chronometer) {
-                Log.d(TAG, "onChronometerTick: Tick");
-            }
-        });
-        stopWatch.start();
+
+        startStopwatch();
     }
+
+    private void startStopwatch(){
+
+        //preparing timer
+        stopwatchHandler = new Handler();
+        stopwatchRunnable = new Runnable() {
+            Intent broadcastIntent = new Intent();
+
+            @Override
+            public void run() {
+                seconds++;
+
+                String hms = String.format("%02d:%02d:%02d", TimeUnit.SECONDS.toHours(seconds),
+                        TimeUnit.SECONDS.toMinutes(seconds) % TimeUnit.HOURS.toMinutes(1),
+                        TimeUnit.SECONDS.toSeconds(seconds) % TimeUnit.MINUTES.toSeconds(1));
+
+                stopwatchHandler.postDelayed(stopwatchRunnable, 1000);
+
+                broadcastIntent = new Intent();
+                broadcastIntent.setAction(Tracking.GET_TIME);
+                broadcastIntent.putExtra(Tracking.THIS_TIME, hms);
+                sendBroadcast(broadcastIntent);
+            }
+        };
+        stopwatchHandler.post(stopwatchRunnable);
+
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand: ");
@@ -83,6 +105,7 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
         Log.d(TAG, "onDestroy: ");
         super.onDestroy();
         notificationManager.cancel(UNIQUE_ID);
+        stopwatchHandler.removeCallbacks(stopwatchRunnable);
         if(googleApiClient.isConnected()){
             LocationServices.FusedLocationApi
                     .removeLocationUpdates(googleApiClient, this);
@@ -149,8 +172,7 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
             //broadcasts Track object
             broadcastIntent = new Intent();
             broadcastIntent.setAction(Tracking.GET_LOCATION);
-            broadcastIntent.putExtra(NEW_TRACK, gson.toJson(newTrack));
-
+            broadcastIntent.putExtra(Tracking.THIS_TRACK, gson.toJson(newTrack));
             sendBroadcast(broadcastIntent);
 
             notificationManager.notify(UNIQUE_ID, createNotification(newTrack.getFormattedDistance()));

@@ -63,7 +63,6 @@ public class Stats extends AppCompatActivity  implements OnMapReadyCallback {
         }else{
             setContentView(R.layout.activity_stats2);
         }
-        setContentView(R.layout.activity_stats2);
         contentResolver = getApplicationContext().getContentResolver();
 
         initComponents();
@@ -102,7 +101,6 @@ public class Stats extends AppCompatActivity  implements OnMapReadyCallback {
             route.setJointType(JointType.ROUND);
         }
     }
-
 
     private void initComponents(){
         todayFilter = findViewById(R.id.stats_today_filter_btn);
