@@ -59,8 +59,6 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
                 .build();
 
         newTrack = new Track();
-
-        startStopwatch();
     }
 
     private void startStopwatch(){
@@ -115,9 +113,8 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
 
     private Notification createNotification(String distance){
         Intent intent = new Intent(this, Tracking.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
@@ -132,6 +129,8 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
     @SuppressLint("MissingPermission")
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+
+        startStopwatch();
         Log.d(TAG, "onConnected: ");
         Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
         onLocationChanged(location);

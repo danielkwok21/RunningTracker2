@@ -19,9 +19,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activities.Tracking" />
-        <activity android:name=".Activities.ViewTrackDetailed" />
-        <activity android:name=".Activities.ViewTracks" />
+        <activity
+            android:name=".Activities.Tracking"
+            android:parentActivityName=".Activities.MainActivity"
+        />
+
+        <activity
+            android:name=".Activities.ViewTrackDetailed"
+            android:parentActivityName=".Activities.ViewTracks"
+            />
+        <activity
+            android:name=".Activities.ViewTracks"
+            android:parentActivityName=".Activities.MainActivity"/>
 
         <service
             android:name=".Services.AndroidLocationService"

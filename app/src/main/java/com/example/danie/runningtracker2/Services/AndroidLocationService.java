@@ -29,19 +29,18 @@ import java.util.concurrent.TimeUnit;
 
 public class AndroidLocationService extends Service{
     private static final String TAG = "AndroidLocationService";
-    public static final String NEW_TRACK = "newTrack";
     private static final int UNIQUE_ID = 1234;
 
     private IBinder locationServiceBinder;
     private NotificationManager notificationManager;
 
-    //traditional methods
     private LocationManager locationManager;
     private LocationListener locationListener;
 
     private Track newTrack;
     private Handler stopwatchHandler;
     private Runnable stopwatchRunnable;
+    private Intent broadcastIntent;
     private int seconds=0;
 
     public AndroidLocationService() {
@@ -50,10 +49,9 @@ public class AndroidLocationService extends Service{
     @Override
     public void onCreate() {
         super.onCreate();
-
+        newTrack = new Track();
         startStopwatch();
     }
-
 
     private void startStopwatch(){
 
@@ -82,7 +80,6 @@ public class AndroidLocationService extends Service{
 
     }
 
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         locationServiceBinder = new ServiceBinder();
@@ -95,21 +92,20 @@ public class AndroidLocationService extends Service{
     @Override
     public void onDestroy() {
         super.onDestroy();
+        broadcastIntent = null;
         notificationManager.cancel(UNIQUE_ID);
-        locationManager = null;
-
+        locationManager.removeUpdates(locationListener);
+        stopwatchHandler.removeCallbacks(stopwatchRunnable);
     }
 
     @SuppressLint("MissingPermission")
     private void startLocationService() {
         Log.d(TAG, "startLocationService: ");
-        newTrack = new Track();
 
         locationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                Intent broadcastIntent;
                 Gson gson = new Gson();
 
                 newTrack.updateTrack(location);
@@ -120,8 +116,7 @@ public class AndroidLocationService extends Service{
                 //broadcasts Track object
                 broadcastIntent = new Intent();
                 broadcastIntent.setAction(Tracking.GET_LOCATION);
-                broadcastIntent.putExtra(NEW_TRACK, gson.toJson(newTrack));
-
+                broadcastIntent.putExtra(Tracking.THIS_TRACK, gson.toJson(newTrack));
                 sendBroadcast(broadcastIntent);
             }
             @Override
@@ -156,9 +151,8 @@ public class AndroidLocationService extends Service{
 
     private Notification createNotification(String distance){
         Intent intent = new Intent(this, Tracking.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP );
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);

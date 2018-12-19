@@ -17,7 +17,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
-import android.widget.Chronometer;
 import android.widget.TextView;
 
 import com.example.danie.runningtracker2.ContentProviders.TracksProvider;
@@ -64,13 +63,21 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     private boolean isGooglePlayAvailable;
 
     private Track newTrack = null;
-    private boolean serviceBounded = false;
+    private boolean isServiceBounded;
     private Gson gson = new Gson();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        locationReceiver = new LocationReceiver();
+        filter = new IntentFilter();
+        filter.addAction(GET_LOCATION);
+        filter.addAction(GET_TIME);
+        registerReceiver(locationReceiver, filter);
 
+        /**
+         * Use either Google API or Android Location services, depending which is available
+         */
         isGooglePlayAvailable = googlePlayAvailable();
         if(isGooglePlayAvailable){
             setContentView(R.layout.activity_tracking);
@@ -81,25 +88,13 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
         if (!checkPermissions()) {
             requestPermissions();
         } else {
-            filter = new IntentFilter();
-            filter.addAction(GET_LOCATION);
-            filter.addAction(GET_TIME);
-            locationReceiver = new LocationReceiver();
-            registerReceiver(locationReceiver, filter);
             initComponents();
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if(serviceBounded){
-            unbindService(connection);
-            Log.d(TAG, "onDestroy: Unbound service");
-            serviceBounded = false;
-        }
-    }
-
+    /**
+     * UI components start changing only when a broadcast is received from services
+     */
     private void initComponents() {
         distance = findViewById(R.id.tracking_distance_tv);
         stopWatch = findViewById(R.id.tracking_duration_chr);
@@ -112,7 +107,9 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
         }
 
         start.setOnClickListener((v)->{
-            if (!serviceBounded) {
+
+            if (!isServiceBounded) {
+
                 if(isGooglePlayAvailable){
                     serviceIntent = new Intent(getApplicationContext(), GooglePlayLocationService.class);
                 }else{
@@ -120,39 +117,33 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                 }
                 startService(serviceIntent);
                 bindService(serviceIntent, connection, BIND_AUTO_CREATE);
-
-                serviceBounded = true;
             } else {
                 try{
                     //stop detecting location
                     newTrack.wrapUp();
                     unbindService(connection);
                     stopService(serviceIntent);
-                    serviceBounded = false;
-
-                    //set ui
-//                    stopWatch.stop();
-                    start.setText(R.string.start);
+                    unregisterReceiver(locationReceiver);
+                    isServiceBounded = false;
 
                     uploadToDB(newTrack);
 
-                    //open detailed view
-                    Intent i = new Intent(this, ViewTrackDetailed.class);
-                    String jsonObject = gson.toJson(newTrack);
-                    i.putExtra(TracksProvider.JSON_OBJECT, jsonObject);
-                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(i);
+                    //reset UI
+                    distance.setText(R.string.no_distance);
+                    stopWatch.setText(R.string.no_duration);
+                    start.setText(R.string.start);
+                    Util.Toast(this, "Good run!");
                 }catch(Exception e){
                     Log.d(TAG, "initComponents: "+e);
                 }
             }
         });
-
-        if(!serviceBounded){
-            start.performClick();
-        }
     }
 
+    /**
+     * Check if google play services is available
+     * @return true if yes, false if not
+     */
     private boolean googlePlayAvailable(){
         GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
         int result = googleAPI.isGooglePlayServicesAvailable(this);
@@ -170,6 +161,9 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
         mMap = googleMap;
     }
 
+    /**
+     * updates MAP fragment whenever new location is found
+     */
     private void redrawRoute(){
         if(isGooglePlayAvailable) {
             List<LatLng> LatLngs = newTrack.getLatLngs();
@@ -219,7 +213,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     public class LocationReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-
+            Log.d(TAG, "onReceive: ");
                 switch(intent.getAction()){
                     case GET_LOCATION:
                         String json = intent.getStringExtra(Tracking.THIS_TRACK);
@@ -229,11 +223,10 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                             start.setText(R.string.stop);
                             distance.setText(newTrack.getFormattedDistance());
                             redrawRoute();
-
-                            serviceBounded = true;
                         }else {
                             Log.d(TAG, "onReceive: newTrack is null");
                         }
+                        isServiceBounded = true;
                         break;
                     case GET_TIME:
                         String formattedSeconds = intent.getStringExtra(Tracking.THIS_TIME);
@@ -250,30 +243,18 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            serviceBounded = true;
-            Util.Toast(getApplicationContext(), "service connected");
-            if(isGooglePlayAvailable){
-                GooglePlayLocationService.ServiceBinder binder = (GooglePlayLocationService.ServiceBinder) service;
-                googlePlayLocationService = binder.getService();
-            }else{
-                AndroidLocationService.ServiceBinder binder = (AndroidLocationService.ServiceBinder) service;
-                androidLocationService = binder.getService();
-            }
+
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            serviceBounded = false;
-            Util.Toast(getApplicationContext(), "service disconnected");
-            Log.d(TAG, "onServiceDisconnected: ");
-            if(isGooglePlayAvailable){
-                googlePlayLocationService = null;
-            }else{
-                androidLocationService = null;
-            }
         }
     };
 
+    /**
+     * Check if permission is available
+     * @return true is yes, false if not
+     */
     private boolean checkPermissions() {
         return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED &&
@@ -281,6 +262,9 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                         == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Request permission from user
+     */
     private void requestPermissions() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
             Util.Toast(this, "Please allow app to access location");
@@ -288,40 +272,25 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                Util.Toast(this, "onRequestPermissionsResult: Permission granted");
-
-                filter = new IntentFilter();
-                filter.addAction(GET_LOCATION);
-                filter.addAction(GET_TIME);
-                locationReceiver = new LocationReceiver();
-                registerReceiver(locationReceiver, filter);
                 initComponents();
-            }else{
-                Util.Toast(this, "onRequestPermissionsResult: Permission not granted");
             }
         }
-//
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if(locationReceiver!=null) {
-            registerReceiver(locationReceiver, filter);
-        }
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        if(locationReceiver!=null){
-            unregisterReceiver(locationReceiver);
-        }
+    protected void onDestroy() {
+        super.onDestroy();
     }
 }

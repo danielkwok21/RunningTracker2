@@ -105,7 +105,7 @@ public class Track{
             newDistance = distance/1000;
             unit = KILOMETER;
         }
-        return String.format("%.2f", newDistance)+unit;
+        return String.format("%.3f", newDistance)+unit;
     }
     public String getFormattedDuration(){
         String hms = String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(duration),

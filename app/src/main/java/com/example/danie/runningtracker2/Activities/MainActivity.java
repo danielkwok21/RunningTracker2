@@ -9,7 +9,6 @@ import android.widget.Button;
 import com.example.danie.runningtracker2.R;
 
 public class MainActivity extends AppCompatActivity {
-
     private static final String TAG = "MainActivity";
     Button startTracking;
     Button viewLogs;
