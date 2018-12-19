@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <ScrollView xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
@@ -115,26 +114,26 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="0dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:text="DISTANCE"
             android:textSize="13sp"
             app:layout_constraintEnd_toStartOf="@+id/stats_best_speed_tv"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/stats_best_speed_tv" />
+            app:layout_constraintTop_toBottomOf="@+id/track_detailed_map" />
 
         <TextView
             android:id="@+id/stats_best_time_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="0dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:text="@string/no_duration"
             android:textSize="13sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/stats_best_speed_tv"
-            app:layout_constraintTop_toTopOf="@+id/stats_best_speed_tv" />
+            app:layout_constraintTop_toBottomOf="@+id/track_detailed_map" />
 
         <TextView
             android:id="@+id/stats_best_speed_tv"
@@ -156,19 +155,16 @@
             android:id="@+id/track_detailed_map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
-            android:layout_height="230dp"
+            android:layout_height="289dp"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="72dp"
-            map:layout_constraintBottom_toBottomOf="parent"
             map:layout_constraintEnd_toEndOf="parent"
             map:layout_constraintHorizontal_bias="0.0"
             map:layout_constraintStart_toStartOf="parent"
             map:layout_constraintTop_toBottomOf="@+id/stats_best_track_date_tv"
-            map:layout_constraintVertical_bias="0.0"
             tools:context=".Activities.MapsActivity" />
 
     </android.support.constraint.ConstraintLayout>

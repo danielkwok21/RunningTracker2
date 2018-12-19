@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<ScrollView xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_height="match_parent"
-    android:layout_width="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.danie.runningtracker2.Activities.ViewTracks">
+
 
     <TextView
         android:id="@+id/track_detailed_start_label"
@@ -25,11 +21,14 @@
         android:id="@+id/track_detailed_startdate_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="60dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="56dp"
+        android:layout_marginEnd="8dp"
         android:text="StartDate"
         android:textSize="30dp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.59"
+        app:layout_constraintStart_toEndOf="@+id/track_detailed_distance"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -46,11 +45,12 @@
         android:id="@+id/track_detailed_enddate_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="60dp"
+        android:layout_marginTop="96dp"
         android:text="EndDate"
         android:textSize="30dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/track_detailed_startdate_tv" />
+        app:layout_constraintEnd_toEndOf="@+id/track_detailed_startdate_tv"
+        app:layout_constraintStart_toStartOf="@+id/track_detailed_startdate_tv"
+        app:layout_constraintTop_toBottomOf="@+id/track_detailed_startdate_tv" />
 
     <TextView
         android:id="@+id/track_detailed_starttime_tv"
@@ -76,27 +76,22 @@
         android:id="@+id/track_detailed_distance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="68dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="72dp"
+        android:layout_marginTop="16dp"
         android:text="distance"
         android:textSize="60dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.503"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/track_detailed_endtime_tv" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 
     <TextView
         android:id="@+id/track_detailed_speed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="72dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
         android:text="speed"
         android:textSize="60dp"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/track_detailed_distance" />
 
@@ -104,13 +99,13 @@
         android:id="@+id/track_detailed_duration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="72dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         android:text="duration"
         android:textSize="60dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/track_detailed_speed" />
+        app:layout_constraintTop_toBottomOf="@+id/track_detailed_speed"
+        app:layout_constraintVertical_bias="0.0" />
 </android.support.constraint.ConstraintLayout>
-</ScrollView>

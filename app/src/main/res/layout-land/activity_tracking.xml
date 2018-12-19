@@ -11,53 +11,56 @@
         android:id="@+id/tracking_distance_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="8dp"
         android:text="@string/no_distance"
         android:textColor="@color/matteblack"
         android:textSize="40dp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/track_detailed_map"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tracking_duration_chr"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
+        android:layout_marginTop="44dp"
         android:gravity="center_horizontal"
         android:text="00:00"
         android:textColor="@color/matteblack"
         android:textSize="40dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tracking_distance_tv" />
+        app:layout_constraintEnd_toEndOf="@+id/tracking_distance_tv"
+        app:layout_constraintHorizontal_bias="0.555"
+        app:layout_constraintStart_toStartOf="@+id/tracking_distance_tv"
+        app:layout_constraintTop_toBottomOf="@+id/tracking_distance_tv" />
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:map="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/track_detailed_map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="300sp"
-        android:layout_marginStart="0dp"
+        android:layout_width="431dp"
+        android:layout_height="match_parent"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="0dp"
         android:layout_marginBottom="8dp"
-        map:layout_constraintBottom_toTopOf="@+id/tracking_start_btn"
+        map:layout_constraintBottom_toBottomOf="parent"
         map:layout_constraintEnd_toEndOf="parent"
+        map:layout_constraintHorizontal_bias="0.0"
         map:layout_constraintStart_toStartOf="parent"
-        map:layout_constraintTop_toBottomOf="@+id/tracking_distance_tv"
+        map:layout_constraintTop_toTopOf="parent"
         tools:context=".Activities.MapsActivity" />
 
     <Button
         android:id="@+id/tracking_start_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="44dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:text="@string/start_tracking"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toEndOf="@+id/tracking_duration_chr"
+        app:layout_constraintStart_toStartOf="@+id/tracking_duration_chr"
+        app:layout_constraintTop_toBottomOf="@+id/tracking_duration_chr" />
 
 </android.support.constraint.ConstraintLayout>

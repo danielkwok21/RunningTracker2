@@ -64,8 +64,9 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
 
     private Track newTrack = null;
     private boolean isServiceBounded;
-    private boolean isReceiverRegisted;
+    private boolean isReceiverRegisted = false;
     private Gson gson = new Gson();
+    private String trackJson;
 
 
     /**
@@ -77,11 +78,13 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
         locationReceiver = new LocationReceiver();
         filter = new IntentFilter();
 
-        //registering register when activity created
-        filter.addAction(GET_LOCATION);
-        filter.addAction(GET_TIME);
-        registerReceiver(locationReceiver, filter);
-        isReceiverRegisted = true;
+        if(!isReceiverRegisted){
+            //registering register when activity created
+            filter.addAction(GET_LOCATION);
+            filter.addAction(GET_TIME);
+            registerReceiver(locationReceiver, filter);
+            isReceiverRegisted = true;
+        }
 
         isGooglePlayAvailable = googlePlayAvailable();
         if(isGooglePlayAvailable){
@@ -142,7 +145,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                     //reset UI
                     distance.setText(R.string.no_distance);
                     stopWatch.setText(R.string.no_duration);
-                    start.setText(R.string.start);
+                    start.setText(R.string.start_tracking);
                     Util.setToast(this, "Good run!");
                 }catch(Exception e){
                     Log.d(TAG, "initComponents: "+e);
@@ -226,12 +229,11 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     public class LocationReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "onReceive: ");
                 switch(intent.getAction()){
                     case GET_LOCATION:
-                        String json = intent.getStringExtra(Tracking.THIS_TRACK);
-                        if(json!=null) {
-                            newTrack = gson.fromJson(json, Track.class);
+                        trackJson = intent.getStringExtra(Tracking.THIS_TRACK);
+                        if(trackJson!=null) {
+                            newTrack = gson.fromJson(trackJson, Track.class);
 
                             start.setText(R.string.stop);
                             distance.setText(newTrack.getFormattedDistance());
@@ -298,6 +300,40 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 initComponents();
             }
+        }
+    }
+//
+//    @Override
+//    protected void onPause() {
+//        super.onPause();
+//        if(isReceiverRegisted){
+//            unregisterReceiver(locationReceiver);
+//        }
+//    }
+//
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        if(!isReceiverRegisted){
+//            registerReceiver(locationReceiver, filter);
+//        }
+//    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(THIS_TRACK, trackJson);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        String trackJson = savedInstanceState.getString(THIS_TRACK);
+        newTrack = gson.fromJson(trackJson, Track.class);
+
+        if(newTrack!=null){
+            start.setText(R.string.stop);
+            distance.setText(newTrack.getFormattedDistance());
         }
     }
 }
