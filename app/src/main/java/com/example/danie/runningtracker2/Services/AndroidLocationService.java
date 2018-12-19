@@ -24,12 +24,13 @@ import com.example.danie.runningtracker2.R;
 import com.example.danie.runningtracker2.Track;
 import com.example.danie.runningtracker2.Util;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.util.concurrent.TimeUnit;
 
 public class AndroidLocationService extends Service{
     private static final String TAG = "AndroidLocationService";
-    private static final int UNIQUE_ID = 1234;
+    private static final int UNIQUE_ID = 520;
 
     private IBinder locationServiceBinder;
     private NotificationManager notificationManager;
@@ -53,9 +54,12 @@ public class AndroidLocationService extends Service{
         startStopwatch();
     }
 
+    /**
+     * Starts a second counter on a separate thread
+     * This counter is only for visual purposes
+     * Real duration is calculated by Calendar.getInstance()
+     */
     private void startStopwatch(){
-
-        //preparing timer
         stopwatchHandler = new Handler();
         stopwatchRunnable = new Runnable() {
             Intent broadcastIntent = new Intent();
@@ -64,7 +68,7 @@ public class AndroidLocationService extends Service{
             public void run() {
                 seconds++;
 
-                String hms = String.format("%02d:%02d:%02d", TimeUnit.SECONDS.toHours(seconds),
+                String time = String.format("%02d:%02d:%02d", TimeUnit.SECONDS.toHours(seconds),
                         TimeUnit.SECONDS.toMinutes(seconds) % TimeUnit.HOURS.toMinutes(1),
                         TimeUnit.SECONDS.toSeconds(seconds) % TimeUnit.MINUTES.toSeconds(1));
 
@@ -72,7 +76,7 @@ public class AndroidLocationService extends Service{
 
                 broadcastIntent = new Intent();
                 broadcastIntent.setAction(Tracking.GET_TIME);
-                broadcastIntent.putExtra(Tracking.THIS_TIME, hms);
+                broadcastIntent.putExtra(Tracking.THIS_TIME, time);
                 sendBroadcast(broadcastIntent);
             }
         };
@@ -89,15 +93,6 @@ public class AndroidLocationService extends Service{
         return START_STICKY;
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        broadcastIntent = null;
-        notificationManager.cancel(UNIQUE_ID);
-        locationManager.removeUpdates(locationListener);
-        stopwatchHandler.removeCallbacks(stopwatchRunnable);
-    }
-
     @SuppressLint("MissingPermission")
     private void startLocationService() {
         Log.d(TAG, "startLocationService: ");
@@ -106,18 +101,24 @@ public class AndroidLocationService extends Service{
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                Gson gson = new Gson();
+                Gson gson =  new GsonBuilder().setPrettyPrinting().create();
 
-                newTrack.updateTrack(location);
-                notificationManager.notify(UNIQUE_ID, createNotification(newTrack.getFormattedDistance()));
+                if(location!=null){
 
-                Log.d(TAG, "onLocationChanged: Lat: "+location.getLatitude()+"|Long: "+location.getLongitude());
+                    Log.d(TAG, "onLocationChanged: Lat: "+location.getLatitude()+"|Long: "+location.getLongitude());
+                    newTrack.updateTrack(location);
 
-                //broadcasts Track object
-                broadcastIntent = new Intent();
-                broadcastIntent.setAction(Tracking.GET_LOCATION);
-                broadcastIntent.putExtra(Tracking.THIS_TRACK, gson.toJson(newTrack));
-                sendBroadcast(broadcastIntent);
+                    //broadcasts Track object
+                    broadcastIntent = new Intent();
+                    broadcastIntent.setAction(Tracking.GET_LOCATION);
+                    broadcastIntent.putExtra(Tracking.THIS_TRACK, gson.toJson(newTrack));
+                    sendBroadcast(broadcastIntent);
+
+                    notificationManager.notify(UNIQUE_ID, createNotification(newTrack.getFormattedDistance()));
+                }else{
+                    Log.d(TAG, "onLocationChanged: location is null");
+                }
+
             }
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -145,7 +146,7 @@ public class AndroidLocationService extends Service{
         if(location!=null){
             locationListener.onLocationChanged(location);
         }else{
-            Util.Toast(this, "Cannot detect current location");
+            Util.setToast(this, "Cannot detect current location");
         }
     }
 
@@ -174,5 +175,15 @@ public class AndroidLocationService extends Service{
         public AndroidLocationService getService(){
             return AndroidLocationService.this;
         }
+    }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        broadcastIntent = null;
+        notificationManager.cancel(UNIQUE_ID);
+        locationManager.removeUpdates(locationListener);
+        stopwatchHandler.removeCallbacks(stopwatchRunnable);
     }
 }

@@ -20,6 +20,7 @@ import android.util.Log;
 import com.example.danie.runningtracker2.Activities.Tracking;
 import com.example.danie.runningtracker2.R;
 import com.example.danie.runningtracker2.Track;
+import com.example.danie.runningtracker2.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -27,18 +28,20 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.util.concurrent.TimeUnit;
 
 public class GooglePlayLocationService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final String TAG = "GPLocationService";
-    private static final int UNIQUE_ID = 1234;
+    private static final int UNIQUE_ID = 520;
 
     private IBinder googlePlayLocationServiceBinder;
     private NotificationManager notificationManager;
     private LocationRequest locationRequest;
     private GoogleApiClient googleApiClient;
+
     private Track newTrack;
     private Handler stopwatchHandler;
     private Runnable stopwatchRunnable;
@@ -61,9 +64,12 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
         newTrack = new Track();
     }
 
+    /**
+     * Starts a second counter on a separate thread
+     * This counter is only for visual purposes
+     * Real duration is calculated by Calendar.getInstance()
+     */
     private void startStopwatch(){
-
-        //preparing timer
         stopwatchHandler = new Handler();
         stopwatchRunnable = new Runnable() {
             Intent broadcastIntent = new Intent();
@@ -72,7 +78,7 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
             public void run() {
                 seconds++;
 
-                String hms = String.format("%02d:%02d:%02d", TimeUnit.SECONDS.toHours(seconds),
+                String time = String.format("%02d:%02d:%02d", TimeUnit.SECONDS.toHours(seconds),
                         TimeUnit.SECONDS.toMinutes(seconds) % TimeUnit.HOURS.toMinutes(1),
                         TimeUnit.SECONDS.toSeconds(seconds) % TimeUnit.MINUTES.toSeconds(1));
 
@@ -80,7 +86,7 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
 
                 broadcastIntent = new Intent();
                 broadcastIntent.setAction(Tracking.GET_TIME);
-                broadcastIntent.putExtra(Tracking.THIS_TIME, hms);
+                broadcastIntent.putExtra(Tracking.THIS_TIME, time);
                 sendBroadcast(broadcastIntent);
             }
         };
@@ -129,31 +135,35 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
     @SuppressLint("MissingPermission")
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+        long UPDATE_INTERVAL = 5000;  /* 5 secs */
+        long FASTEST_INTERVAL = 1000; /* 1 secs */
 
         startStopwatch();
         Log.d(TAG, "onConnected: ");
-        Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-        onLocationChanged(location);
 
-        long UPDATE_INTERVAL = 5000;  /* 5 secs */
-        long FASTEST_INTERVAL = 1000; /* 1 secs */
+        //get initial location
+        Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        if(location!=null){
+            onLocationChanged(location);
+        }else{
+            Util.setToast(this, "Cannot detect current location");
+        }
 
         locationRequest = new LocationRequest();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(UPDATE_INTERVAL);
         locationRequest.setFastestInterval(FASTEST_INTERVAL);
-
         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-
+        Util.setToast(this, "Connection suspended");
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        Util.setToast(this, "Connection failed");
     }
 
     @Override
@@ -164,8 +174,10 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
     @Override
     public void onLocationChanged(Location location) {
         Intent broadcastIntent;
-        Gson gson = new Gson();
+        Gson gson =  new GsonBuilder().setPrettyPrinting().create();
         if(location!=null){
+            Log.d(TAG, "onLocationChanged: Lat: "+location.getLatitude()+"|Long: "+location.getLongitude());
+
             newTrack.updateTrack(location);
 
             //broadcasts Track object

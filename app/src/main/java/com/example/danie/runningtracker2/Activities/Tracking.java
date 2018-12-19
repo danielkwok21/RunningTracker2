@@ -127,7 +127,6 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                 startService(serviceIntent);
                 bindService(serviceIntent, connection, BIND_AUTO_CREATE);
             } else {
-                Util.Toast(this, "End locating");
                 try{
                     //stop detecting location
                     newTrack.wrapUp();
@@ -144,7 +143,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                     distance.setText(R.string.no_distance);
                     stopWatch.setText(R.string.no_duration);
                     start.setText(R.string.start);
-                    Util.Toast(this, "Good run!");
+                    Util.setToast(this, "Good run!");
                 }catch(Exception e){
                     Log.d(TAG, "initComponents: "+e);
                 }
@@ -215,11 +214,15 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             return true;
         }catch(Exception e){
             Log.d(TAG, "uploadToDB: "+e);
-            Util.Toast(this, "Unable to store track");
+            Util.setToast(this, "Unable to store track");
             return false;
         }
     }
 
+    /**
+     * Gets registered when activity created
+     * Unregistered when user stops locating
+     */
     public class LocationReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -227,9 +230,9 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                 switch(intent.getAction()){
                     case GET_LOCATION:
                         String json = intent.getStringExtra(Tracking.THIS_TRACK);
-                        newTrack = gson.fromJson(json, Track.class);
+                        if(json!=null) {
+                            newTrack = gson.fromJson(json, Track.class);
 
-                        if(newTrack!=null) {
                             start.setText(R.string.stop);
                             distance.setText(newTrack.getFormattedDistance());
 
@@ -261,6 +264,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            Util.setToast(getApplicationContext(), "Service disconnected abruptly!");
         }
     };
 
@@ -280,7 +284,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
      */
     private void requestPermissions() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-            Util.Toast(this, "Please allow app to access location");
+            Util.setToast(this, "Please allow app to access location");
         } else {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }

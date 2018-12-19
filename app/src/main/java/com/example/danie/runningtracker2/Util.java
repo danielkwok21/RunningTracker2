@@ -10,10 +10,10 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class Util {
-    public static void Toast(Context c, String s){
+
+    public static void setToast(Context c, String s){
         Toast toast = Toast.makeText(c, s, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.BOTTOM, 0, 600);
         toast.show();
     }
-
 }
