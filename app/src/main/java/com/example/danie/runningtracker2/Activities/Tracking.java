@@ -64,20 +64,25 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
 
     private Track newTrack = null;
     private boolean isServiceBounded;
+    private boolean isReceiverRegisted;
     private Gson gson = new Gson();
 
+
+    /**
+     * Use either Google API or Android Location services, depending which is available
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         locationReceiver = new LocationReceiver();
         filter = new IntentFilter();
+
+        //registering register when activity created
         filter.addAction(GET_LOCATION);
         filter.addAction(GET_TIME);
         registerReceiver(locationReceiver, filter);
+        isReceiverRegisted = true;
 
-        /**
-         * Use either Google API or Android Location services, depending which is available
-         */
         isGooglePlayAvailable = googlePlayAvailable();
         if(isGooglePlayAvailable){
             setContentView(R.layout.activity_tracking);
@@ -110,6 +115,10 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
 
             if (!isServiceBounded) {
 
+                if(!isReceiverRegisted){
+                    registerReceiver(locationReceiver, filter);
+                }
+
                 if(isGooglePlayAvailable){
                     serviceIntent = new Intent(getApplicationContext(), GooglePlayLocationService.class);
                 }else{
@@ -118,13 +127,16 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                 startService(serviceIntent);
                 bindService(serviceIntent, connection, BIND_AUTO_CREATE);
             } else {
+                Util.Toast(this, "End locating");
                 try{
                     //stop detecting location
                     newTrack.wrapUp();
                     unbindService(connection);
                     stopService(serviceIntent);
-                    unregisterReceiver(locationReceiver);
                     isServiceBounded = false;
+
+                    unregisterReceiver(locationReceiver);
+                    isReceiverRegisted = false;
 
                     uploadToDB(newTrack);
 
@@ -165,33 +177,31 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
      * updates MAP fragment whenever new location is found
      */
     private void redrawRoute(){
-        if(isGooglePlayAvailable) {
-            List<LatLng> LatLngs = newTrack.getLatLngs();
-            if (!LatLngs.isEmpty()) {
+        List<LatLng> LatLngs = newTrack.getLatLngs();
+        if (!LatLngs.isEmpty()) {
 
-                mMap.clear();
+            mMap.clear();
 
-                //set starting point
-                LatLng start = LatLngs.get(0);
-                mMap.addMarker(new MarkerOptions().position(start).title(THIS_TRACK));
+            //set starting point
+            LatLng start = LatLngs.get(0);
+            mMap.addMarker(new MarkerOptions().position(start).title(THIS_TRACK));
 
-                //set current point
-                LatLng here = LatLngs.get(LatLngs.size()-1);
-                mMap.addMarker(new MarkerOptions().position(here).title(THIS_TRACK));
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(here));
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(20.0f));
+            //set current point
+            LatLng here = LatLngs.get(LatLngs.size()-1);
+            mMap.addMarker(new MarkerOptions().position(here).title(THIS_TRACK));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(here));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(20.0f));
 
-                //populating latlngs list to draw route
-                Polyline route = mMap.addPolyline(new PolylineOptions()
-                        .clickable(true)
-                        .addAll(LatLngs));
-                route.setTag(THIS_TRACK);
+            //populating latlngs list to draw route
+            Polyline route = mMap.addPolyline(new PolylineOptions()
+                    .clickable(true)
+                    .addAll(LatLngs));
+            route.setTag(THIS_TRACK);
 
-                route.setEndCap(new RoundCap());
-                route.setWidth(10);
-                route.setColor(getResources().getColor(R.color.colorAccent));
-                route.setJointType(JointType.ROUND);
-            }
+            route.setEndCap(new RoundCap());
+            route.setWidth(10);
+            route.setColor(getResources().getColor(R.color.colorAccent));
+            route.setJointType(JointType.ROUND);
         }
     }
 
@@ -222,7 +232,10 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                         if(newTrack!=null) {
                             start.setText(R.string.stop);
                             distance.setText(newTrack.getFormattedDistance());
-                            redrawRoute();
+
+                            if(isGooglePlayAvailable) {
+                                redrawRoute();
+                            }
                         }else {
                             Log.d(TAG, "onReceive: newTrack is null");
                         }
@@ -282,15 +295,5 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                 initComponents();
             }
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
     }
 }
