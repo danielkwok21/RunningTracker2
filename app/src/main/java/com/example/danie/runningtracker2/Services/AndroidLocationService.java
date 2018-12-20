@@ -54,6 +54,21 @@ public class AndroidLocationService extends Service{
         startStopwatch();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        newTrack.wrapUp();
+
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction(Tracking.SERVICE_ENDED);
+        sendBroadcast(broadcastIntent);
+
+        broadcastIntent = null;
+        notificationManager.cancel(UNIQUE_ID);
+        locationManager.removeUpdates(locationListener);
+        stopwatchHandler.removeCallbacks(stopwatchRunnable);
+    }
+
     /**
      * Starts a second counter on a separate thread
      * This counter is only for visual purposes
@@ -173,14 +188,5 @@ public class AndroidLocationService extends Service{
         public AndroidLocationService getService(){
             return AndroidLocationService.this;
         }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        broadcastIntent = null;
-        notificationManager.cancel(UNIQUE_ID);
-        locationManager.removeUpdates(locationListener);
-        stopwatchHandler.removeCallbacks(stopwatchRunnable);
     }
 }

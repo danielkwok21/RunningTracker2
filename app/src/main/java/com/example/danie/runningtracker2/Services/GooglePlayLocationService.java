@@ -108,6 +108,12 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
     public void onDestroy() {
         Log.d(TAG, "onDestroy: ");
         super.onDestroy();
+        newTrack.wrapUp();
+
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction(Tracking.SERVICE_ENDED);
+        sendBroadcast(broadcastIntent);
+
         notificationManager.cancel(UNIQUE_ID);
         stopwatchHandler.removeCallbacks(stopwatchRunnable);
         if(googleApiClient.isConnected()){

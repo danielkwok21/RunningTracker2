@@ -42,6 +42,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     private static final String TAG = "Tracking";
     public static final String GET_LOCATION = "getLocation";
     public static final String GET_TIME = "getTime";
+    public static final String SERVICE_ENDED = "serviceEnded";
     public static final String THIS_TRACK = "thisTrack";
     public static final String THIS_TIME = "thisTime";
 
@@ -61,7 +62,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
 
     private Track newTrack = null;
     private boolean isServiceRunning;
-    private boolean isReceiverRegisted;
+    private boolean isReceiverRegistered;
     private Gson gson = new Gson();
     private String trackJson;
 
@@ -98,9 +99,9 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     @Override
     protected void onPause() {
         super.onPause();
-        if(isReceiverRegisted){
+        if(isReceiverRegistered){
             unregisterReceiver(locationReceiver);
-            isReceiverRegisted = false;
+            isReceiverRegistered = false;
         }
     }
 
@@ -110,9 +111,9 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     @Override
     protected void onResume() {
         super.onResume();
-        if(!isReceiverRegisted){
+        if(!isReceiverRegistered){
             registerReceiver(locationReceiver, filter);
-            isReceiverRegisted = true;
+            isReceiverRegistered = true;
         }
     }
 
@@ -139,22 +140,19 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                 isServiceRunning = true;
 
                 //registers receiver whenever user tries to track location again, without exiting activity
-                if(!isReceiverRegisted){
+                if(!isReceiverRegistered){
                     registerReceiver(locationReceiver, filter);
-                    isReceiverRegisted = true;
+                    isReceiverRegistered = true;
                 }
-
-                MainActivity.startTracking.setText(R.string.resume_track);
             } else {
 
                 //stop detecting location
                 try{
-                    newTrack.wrapUp();
                     stopService(serviceIntent);
                     isServiceRunning = false;
 
                     unregisterReceiver(locationReceiver);
-                    isReceiverRegisted = false;
+                    isReceiverRegistered = false;
 
                     uploadToDB(newTrack);
 
@@ -163,8 +161,6 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                     stopWatch.setText(R.string.no_duration);
                     start.setText(R.string.start_tracking);
                     Util.setToast(this, "Good run!");
-
-                    MainActivity.startTracking.setText(R.string.new_track);
                 }catch(Exception e){
                     Log.d(TAG, "initComponents: "+e);
                 }
@@ -246,34 +242,34 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     public class LocationReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-                switch(intent.getAction()){
-                    case GET_LOCATION:
-                        trackJson = intent.getStringExtra(Tracking.THIS_TRACK);
-                        if(trackJson!=null) {
-                            newTrack = gson.fromJson(trackJson, Track.class);
+            switch(intent.getAction()){
+                case GET_LOCATION:
+                    trackJson = intent.getStringExtra(Tracking.THIS_TRACK);
+                    if(trackJson!=null) {
+                        newTrack = gson.fromJson(trackJson, Track.class);
 
-                            start.setText(R.string.stop);
-                            distance.setText(Util.getFormattedDistance(newTrack.getDistance()));
+                        start.setText(R.string.stop);
+                        distance.setText(Util.getFormattedDistance(newTrack.getDistance()));
 
-                            if(isGooglePlayAvailable) {
-                                redrawRoute();
-                            }
-                        }else {
-                            Log.d(TAG, "onReceive: newTrack is null");
+                        if(isGooglePlayAvailable) {
+                            redrawRoute();
                         }
-                        isServiceRunning = true;
-                        break;
-                    case GET_TIME:
-                        String formattedSeconds = intent.getStringExtra(Tracking.THIS_TIME);
+                    }else {
+                        Log.d(TAG, "onReceive: newTrack is null");
+                    }
+                    isServiceRunning = true;
+                    break;
+                case GET_TIME:
+                    String formattedSeconds = intent.getStringExtra(Tracking.THIS_TIME);
 
-                        stopWatch.setText(formattedSeconds);
-                        break;
-                    default:
-                        break;
-                }
-
+                    stopWatch.setText(formattedSeconds);
+                    break;
+                default:
+                    break;
             }
+
         }
+    }
 
     /**
      * Check if permission is available

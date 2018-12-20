@@ -6,10 +6,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 
 import com.example.danie.runningtracker2.R;
+import com.example.danie.runningtracker2.Track;
+import com.example.danie.runningtracker2.Util;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -19,9 +22,18 @@ public class MainActivity extends AppCompatActivity {
     private ImageView viewTracksIv;
     private Button viewTracks;
 
+    private ServiceStatusReceiver statusReceiver;
+    private IntentFilter filter;
+    private boolean isReceiverRegisted;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        statusReceiver = new ServiceStatusReceiver();
+        filter = new IntentFilter();
+        filter.addAction(Tracking.GET_TIME);
+        filter.addAction(Tracking.SERVICE_ENDED);
+
         setContentView(R.layout.activity_main);
         initComponents();
     }
@@ -49,5 +61,46 @@ public class MainActivity extends AppCompatActivity {
             Intent i = new Intent(this, ViewTracks.class);
             startActivity(i);
         });
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(isReceiverRegisted){
+            unregisterReceiver(statusReceiver);
+            isReceiverRegisted = false;
+        }
+    }
+
+    /**
+     * Unregisters receiver whenever activity created, or device rotated
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(!isReceiverRegisted){
+            registerReceiver(statusReceiver, filter);
+            isReceiverRegisted = true;
+        }
+    }
+
+    public class ServiceStatusReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch(intent.getAction()){
+                //if location service is running
+                case Tracking.GET_TIME:
+                    startTracking.setText(context.getString(R.string.resume_track));
+                    break;
+                //if location service is not running
+                case Tracking.SERVICE_ENDED:
+                    startTracking.setText(context.getString(R.string.new_track));
+                    break;
+                default:
+                    break;
+            }
+
+        }
     }
 }
