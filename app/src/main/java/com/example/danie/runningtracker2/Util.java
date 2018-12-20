@@ -9,6 +9,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Class to store all misc functions
+ */
 public class Util {
 
     public static void setToast(Context c, String s){

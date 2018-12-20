@@ -118,7 +118,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     }
 
     /**
-     * UI components start changing only when a broadcast is received from services
+     * UI components refresh only when a broadcast is received from services
      */
     private void initComponents() {
         distance = findViewById(R.id.tracking_distance_tv);
@@ -162,7 +162,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                     distance.setText(R.string.no_distance);
                     stopWatch.setText(R.string.no_duration);
                     start.setText(R.string.start_tracking);
-                    Util.setToast(this, "Good run!");
+                    Util.setToast(this, "Good run! Track saved!");
                 }catch(Exception e){
                     Log.d(TAG, "initComponents: "+e);
                 }
@@ -240,6 +240,9 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     /**
      * Gets registered when activity created
      * Unregistered when user stops locating
+     * Receives updates from service
+     * 1. Seconds count
+     * 2. New location
      */
     public class LocationReceiver extends BroadcastReceiver {
         @Override

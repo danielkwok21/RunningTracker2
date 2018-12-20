@@ -29,7 +29,7 @@ public class Track{
     private List<LatLng> latlngs = new ArrayList<>();
 
     /**
-     * sets startDate and startTime upon creation of this track
+     * Sets startDate and startTime upon creation of this track
      */
     public Track(){
         startNow = Calendar.getInstance();
@@ -109,6 +109,10 @@ public class Track{
         return latlngs;
     }
 
+    /**
+     * Calculates speed based on distance and duration
+     * @return -1 if duration is 0
+     */
     public double getSpeed(){
         if(duration!=0){
             return distance/duration;

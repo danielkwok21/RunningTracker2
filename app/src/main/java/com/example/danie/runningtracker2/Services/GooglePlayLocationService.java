@@ -101,10 +101,16 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
         googlePlayLocationServiceBinder = new ServiceBinder();
         googleApiClient.connect();
 
-        startForeground(UNIQUE_ID, createNotification(""));
+        startForeground(UNIQUE_ID, createNotification(getApplicationContext().getString(R.string.no_distance)));
         return START_STICKY;
     }
 
+    /**
+     * Dismisses notification
+     * Stops stopwatch
+     * Disconnect google api client
+     * Sends broadcast to inform ending of service
+     */
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy: ");
@@ -179,6 +185,11 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
         return googlePlayLocationServiceBinder;
     }
 
+    /**
+     * Gets new location object from Google API
+     * Broadcasts new location object
+     * @param location
+     */
     @Override
     public void onLocationChanged(Location location) {
         Intent broadcastIntent;

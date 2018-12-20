@@ -33,6 +33,12 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Breaks down today's/tomonth's tracks
+ * 1. Total distance
+ * 2. Ave distance
+ * 3. Best track (in terms of speed)
+ */
 public class Stats extends AppCompatActivity  implements OnMapReadyCallback {
     private static final String TAG = "Stats";
     private static final String TODAY = "today";
@@ -68,7 +74,6 @@ public class Stats extends AppCompatActivity  implements OnMapReadyCallback {
 
         initComponents();
     }
-
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -158,53 +163,6 @@ public class Stats extends AppCompatActivity  implements OnMapReadyCallback {
         bestSpeed.setText(Util.getFormattedSpeed(bestTrack.getSpeed()));
     }
 
-    private double getTotalDistance(List<Track> tracks){
-        double totalDistance = 0;
-        for(Track track:tracks){
-            totalDistance+=track.getDistance();
-        }
-        return totalDistance;
-    }
-
-    private double getAveDistance(List<Track> tracks){
-        return tracks.size()!=0? getTotalDistance(tracks)/tracks.size():-1;
-    }
-
-    private Track getBestTrack(List<Track> tracks){
-        Track bestTrack = tracks.get(0);
-        for(Track track:tracks){
-            if(track.getSpeed()>bestTrack.getSpeed()){
-                bestTrack = track;
-            }
-        }
-        return bestTrack;
-    }
-
-    private List<Track> getFilterTracks(List<Track> tracks, String filter){
-        List<Track> filteredTracks = new ArrayList<>();
-
-        switch(filter){
-            case TODAY:
-                for(Track track:tracks){
-                    if(track.getStartNow().get(Calendar.DAY_OF_YEAR)==Calendar.getInstance().get(Calendar.DAY_OF_YEAR)){
-                        filteredTracks.add(track);
-                    }
-                }
-                break;
-            case TOMONTH:
-                for(Track track:tracks){
-                    if(track.getStartNow().get(Calendar.MONTH)==Calendar.getInstance().get(Calendar.MONTH)){
-                        filteredTracks.add(track);
-                    }
-                }
-                break;
-            default:
-                Log.d(TAG, "getFilterTracks: Error. Wrong filter");
-        }
-
-        return filteredTracks;
-    }
-
     private List<Track> getTracksFromProvider(){
         Uri uri = TracksProvider.CONTENT_URL;
         Cursor c = contentResolver.query(uri, null, null, null, TracksProvider.ID);
@@ -236,6 +194,53 @@ public class Stats extends AppCompatActivity  implements OnMapReadyCallback {
 
         Collections.reverse(tracks);
         return tracks;
+    }
+
+    private List<Track> getFilterTracks(List<Track> tracks, String filter){
+        List<Track> filteredTracks = new ArrayList<>();
+
+        switch(filter){
+            case TODAY:
+                for(Track track:tracks){
+                    if(track.getStartNow().get(Calendar.DAY_OF_YEAR)==Calendar.getInstance().get(Calendar.DAY_OF_YEAR)){
+                        filteredTracks.add(track);
+                    }
+                }
+                break;
+            case TOMONTH:
+                for(Track track:tracks){
+                    if(track.getStartNow().get(Calendar.MONTH)==Calendar.getInstance().get(Calendar.MONTH)){
+                        filteredTracks.add(track);
+                    }
+                }
+                break;
+            default:
+                Log.d(TAG, "getFilterTracks: Error. Wrong filter");
+        }
+
+        return filteredTracks;
+    }
+
+    private double getTotalDistance(List<Track> tracks){
+        double totalDistance = 0;
+        for(Track track:tracks){
+            totalDistance+=track.getDistance();
+        }
+        return totalDistance;
+    }
+
+    private double getAveDistance(List<Track> tracks){
+        return tracks.size()!=0? getTotalDistance(tracks)/tracks.size():-1;
+    }
+
+    private Track getBestTrack(List<Track> tracks){
+        Track bestTrack = tracks.get(0);
+        for(Track track:tracks){
+            if(track.getSpeed()>bestTrack.getSpeed()){
+                bestTrack = track;
+            }
+        }
+        return bestTrack;
     }
 
     private boolean googlePlayAvailable(){

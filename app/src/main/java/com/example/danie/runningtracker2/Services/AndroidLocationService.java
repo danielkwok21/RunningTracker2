@@ -55,6 +55,12 @@ public class AndroidLocationService extends Service{
         startStopwatch();
     }
 
+    /**
+     * Dismisses notification
+     * Stops stopwatch
+     * Stops location listener
+     * Sends broadcast to inform ending of service
+     */
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -64,7 +70,6 @@ public class AndroidLocationService extends Service{
         broadcastIntent.setAction(Tracking.SERVICE_ENDED);
         sendBroadcast(broadcastIntent);
 
-        broadcastIntent = null;
         notificationManager.cancel(UNIQUE_ID);
         locationManager.removeUpdates(locationListener);
         stopwatchHandler.removeCallbacks(stopwatchRunnable);
@@ -108,6 +113,12 @@ public class AndroidLocationService extends Service{
         return START_STICKY;
     }
 
+    /**
+     * Starts location service by
+     * 1. Getting last known location
+     * 2. Calls onLocationChanged() whenever a new location is detected
+     * 3. Broadcasts new location object
+     */
     @SuppressLint("MissingPermission")
     private void startLocationService() {
         Log.d(TAG, "startLocationService: ");
