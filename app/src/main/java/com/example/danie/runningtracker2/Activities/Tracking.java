@@ -256,7 +256,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                             newTrack = gson.fromJson(trackJson, Track.class);
 
                             start.setText(R.string.stop);
-                            distance.setText(newTrack.getFormattedDistance());
+                            distance.setText(Util.getFormattedDistance(newTrack.getDistance()));
 
                             if(isGooglePlayAvailable) {
                                 redrawRoute();
@@ -325,7 +325,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
 
         if(newTrack!=null){
             start.setText(R.string.stop);
-            distance.setText(newTrack.getFormattedDistance());
+            distance.setText(Util.getFormattedDistance(newTrack.getDistance()));
         }
     }
 }

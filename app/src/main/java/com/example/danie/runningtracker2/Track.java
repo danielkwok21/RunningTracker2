@@ -14,9 +14,6 @@ import java.util.List;
 
 public class Track{
     private final String TAG = "Track";
-    private final String METER = "m";
-    private final String KILOMETER = "km";
-    private String unit = METER;
 
     private String name;
     private LatLng startLatLng;
@@ -39,8 +36,8 @@ public class Track{
      */
     public Track(){
         startNow = Calendar.getInstance();
-        startDate = getFormattedDateFromDate(startNow.getTime());
-        startTime = getFormattedTimeFromDate(startNow.getTime());
+        startDate = Util.getFormattedDateFromDate(startNow.getTime());
+        startTime = Util.getFormattedTimeFromDate(startNow.getTime());
     }
 
     /**
@@ -68,20 +65,7 @@ public class Track{
         distance = distance+prevLocation.distanceTo(currentLocation);
 
         Log.d(TAG, "updateTrack: distance="+distance);
-        name = getFormattedDistance()+" on "+getStartDate();
-    }
-
-    /**
-     * Conversion function LatLng -> Location
-     * @param latLng
-     * @return location
-     */
-    private Location getLocationFromLatLng(LatLng latLng){
-        Location l = new Location("");
-        l.setLatitude(latLng.latitude);
-        l.setLongitude(latLng.longitude);
-
-        return l;
+        name = Util.getFormattedDistance(distance)+" on "+getStartDate();
     }
 
     /**
@@ -91,8 +75,8 @@ public class Track{
      */
     public void wrapUp(){
         Calendar endNow = Calendar.getInstance();
-        endDate = getFormattedDateFromDate(endNow.getTime());
-        endTime = getFormattedTimeFromDate(endNow.getTime());
+        endDate = Util.getFormattedDateFromDate(endNow.getTime());
+        endTime = Util.getFormattedTimeFromDate(endNow.getTime());
 
         duration = endNow.getTime().getTime() - startNow.getTime().getTime();
 
@@ -105,22 +89,6 @@ public class Track{
 
     public double getDistance() {
         return distance;
-    }
-
-    public String getFormattedDistance(){
-        Double newDistance = distance;
-
-        //converts to km if distance is above 1000m
-        if(distance>1000 && unit.equals(METER)){
-            newDistance = distance/1000;
-            unit = KILOMETER;
-        }
-        return String.format("%.3f", newDistance)+unit;
-    }
-    public String getFormattedDuration(){
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(duration);
-        return getFormattedTimeFromDate(calendar.getTime());
     }
 
     public String getStartDate() {
@@ -139,6 +107,10 @@ public class Track{
         return endTime;
     }
 
+    public long getDuration() {
+        return duration;
+    }
+
     public LatLng getStartLatLng() {
         return startLatLng;
     }
@@ -155,19 +127,6 @@ public class Track{
         return distance/duration;
     }
 
-    public String getFormattedSpeed(){
-        double speed;
-        double km;
-        double hour;
-
-        //convert to km/h
-        km = distance/1000;
-        hour = duration*0.0000036;
-        speed = km/hour;
-
-        return String.format("%.3f", speed)+"km/h";
-    }
-
     public Calendar getStartNow() {
         return startNow;
     }
@@ -176,13 +135,16 @@ public class Track{
         return endNow;
     }
 
-    private static String getFormattedTimeFromDate(Date date){
-        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-        return timeFormat.format(date);
-    }
+    /**
+     * Conversion function LatLng -> Location
+     * @param latLng
+     * @return location
+     */
+    private Location getLocationFromLatLng(LatLng latLng){
+        Location l = new Location("");
+        l.setLatitude(latLng.latitude);
+        l.setLongitude(latLng.longitude);
 
-    private static String getFormattedDateFromDate(Date date){
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
-        return dateFormat.format(date);
+        return l;
     }
 }

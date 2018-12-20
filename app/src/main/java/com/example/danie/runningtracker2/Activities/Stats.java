@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.example.danie.runningtracker2.ContentProviders.TracksProvider;
 import com.example.danie.runningtracker2.R;
 import com.example.danie.runningtracker2.Track;
+import com.example.danie.runningtracker2.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -134,27 +135,15 @@ public class Stats extends AppCompatActivity  implements OnMapReadyCallback {
     }
 
     private void refreshStats(List<Track> newTracks){
-        totalDistance.setText(formatDistance(getTotalDistance(newTracks)));
-        aveDistance.setText(formatDistance(getAveDistance(newTracks)));
+        totalDistance.setText(Util.getFormattedDistance(getTotalDistance(newTracks)));
+        aveDistance.setText(Util.getFormattedDistance(getAveDistance(newTracks)));
 
         bestTrack = getBestTrack(newTracks);
 
-        bestDate.setText("Your best track was on "+bestTrack.getStartDate());
-        bestDistance.setText(bestTrack.getFormattedDistance());
-        bestTime.setText(bestTrack.getFormattedDuration());
-        bestSpeed.setText(bestTrack.getFormattedSpeed());
-    }
-
-    private String formatDistance(double distance){
-        final String METER = "m";
-        final String KILOMETER = "km";
-        String unit = METER;
-        //converts to km if distance is above 1000m
-        if(distance>1000){
-            distance = distance/1000;
-            unit = KILOMETER;
-        }
-        return String.format("%.2f", distance)+unit;
+        bestDate.setText(bestTrack.getStartDate());
+        bestDistance.setText(Util.getFormattedDistance(bestTrack.getDistance()));
+        bestTime.setText(Util.getFormattedDurationFromMils(bestTrack.getDuration()));
+        bestSpeed.setText(Util.getFormattedSpeed(bestTrack.getSpeed()));
     }
 
     private double getTotalDistance(List<Track> tracks){

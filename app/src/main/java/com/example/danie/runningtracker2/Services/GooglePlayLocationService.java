@@ -186,7 +186,7 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
             broadcastIntent.putExtra(Tracking.THIS_TRACK, gson.toJson(newTrack));
             sendBroadcast(broadcastIntent);
 
-            notificationManager.notify(UNIQUE_ID, createNotification(newTrack.getFormattedDistance()));
+            notificationManager.notify(UNIQUE_ID, createNotification(Util.getFormattedDistance(newTrack.getDistance())));
         }else{
             Log.d(TAG, "onLocationChanged: location is null");
         }

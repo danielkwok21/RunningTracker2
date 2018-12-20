@@ -21,16 +21,19 @@
         </activity>
         <activity
             android:name=".Activities.Tracking"
-            android:parentActivityName=".Activities.MainActivity"
-        />
+            android:parentActivityName=".Activities.MainActivity"/>
 
         <activity
             android:name=".Activities.ViewTrackDetailed"
-            android:parentActivityName=".Activities.ViewTracks"
-            />
+            android:parentActivityName=".Activities.ViewTracks"/>
+
         <activity
             android:name=".Activities.ViewTracks"
             android:parentActivityName=".Activities.MainActivity"/>
+
+        <activity
+            android:name=".Activities.Stats"
+            android:parentActivityName=".Activities.ViewTracks"/>
 
         <service
             android:name=".Services.AndroidLocationService"
@@ -60,8 +63,6 @@
             android:name=".Services.GooglePlayLocationService"
             android:enabled="true"
             android:exported="true" />
-
-        <activity android:name=".Activities.Stats"></activity>
     </application>
 
 </manifest>

@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.example.danie.runningtracker2.ContentProviders.TracksProvider;
 import com.example.danie.runningtracker2.Track;
 import com.example.danie.runningtracker2.R;
+import com.example.danie.runningtracker2.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -33,6 +34,7 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
     private TextView endTime;
     private TextView distance;
     private TextView duration;
+    private TextView speed;
     private GoogleMap mMap;
     private SupportMapFragment mapFragment;
 
@@ -40,17 +42,6 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
     private Gson gson;
 
     private boolean googlePlayAvailable;
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            // Respond to the action bar's Up/Home button
-            case android.R.id.home:
-                NavUtils.navigateUpFromSameTask(this);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,14 +110,16 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
         endTime = findViewById(R.id.track_detailed_endtime_tv);
         distance = findViewById(R.id.track_detailed_distance);
         duration = findViewById(R.id.track_detailed_duration);
+        speed = findViewById(R.id.track_detailed_speed);
 
         startDate.setText(track.getStartDate());
         startTime.setText(track.getStartTime());
         endDate.setText(track.getEndDate());
         endTime.setText(track.getEndTime());
 
-        distance.setText(track.getFormattedDistance());
-        duration.setText(track.getFormattedDuration());
+        distance.setText(Util.getFormattedDistance(track.getDistance()));
+        duration.setText(Util.getFormattedDurationFromMils(track.getDuration()));
+        speed.setText(Util.getFormattedSpeed(track.getSpeed()));
 
         if(googlePlayAvailable) {
             mapFragment = (SupportMapFragment) getSupportFragmentManager()
