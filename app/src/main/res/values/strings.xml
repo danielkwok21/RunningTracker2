@@ -13,7 +13,7 @@
     <string name="duration">DURATION</string>
     <string name="start_tracking">Start</string>
     <string name="stop">Stop</string>
-    <string name="startAt">Start: </string>
+    <string name="start_sentence">This track was ran at</string>
     <string name="endAt">End: </string>
     <string name="best_track_sentence">Your best track was at</string>
     <string name="no_track_tomonth">No track this month. Create one now!</string>

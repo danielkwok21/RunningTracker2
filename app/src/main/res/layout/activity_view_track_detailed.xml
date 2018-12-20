@@ -18,7 +18,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:text="@string/startAt"
+            android:text="@string/start_sentence"
+            android:textColor="@color/matteblack"
             app:layout_constraintBottom_toTopOf="@+id/track_detailed_startdate_tv"
             app:layout_constraintEnd_toEndOf="@+id/track_detailed_startdate_tv"
             app:layout_constraintStart_toStartOf="@+id/track_detailed_startdate_tv" />
@@ -27,49 +28,14 @@
             android:id="@+id/track_detailed_startdate_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="60dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="32dp"
+            android:layout_marginEnd="8dp"
             android:text="StartDate"
             android:textSize="30dp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:map="http://schemas.android.com/apk/res-auto"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/track_detailed_map"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="337dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginTop="8dp"
-            map:layout_constraintEnd_toEndOf="parent"
-            map:layout_constraintStart_toStartOf="parent"
-            map:layout_constraintTop_toBottomOf="@+id/track_detailed_duration_tv"
-            tools:context=".Activities.MapsActivity" />
-
-        <TextView
-            android:id="@+id/track_detailed_end_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="@string/endAt"
-            app:layout_constraintBottom_toTopOf="@+id/track_detailed_enddate_tv"
-            app:layout_constraintEnd_toEndOf="@+id/track_detailed_enddate_tv"
-            app:layout_constraintStart_toStartOf="@+id/track_detailed_enddate_tv" />
-
-        <TextView
-            android:id="@+id/track_detailed_enddate_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="60dp"
-            android:text="EndDate"
-            android:textSize="30dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/track_detailed_startdate_tv" />
 
         <TextView
             android:id="@+id/track_detailed_starttime_tv"
@@ -80,16 +46,6 @@
             app:layout_constraintEnd_toEndOf="@+id/track_detailed_startdate_tv"
             app:layout_constraintStart_toStartOf="@+id/track_detailed_startdate_tv"
             app:layout_constraintTop_toBottomOf="@+id/track_detailed_startdate_tv" />
-
-        <TextView
-            android:id="@+id/track_detailed_endtime_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="EndTime"
-            app:layout_constraintEnd_toEndOf="@+id/track_detailed_enddate_tv"
-            app:layout_constraintStart_toStartOf="@+id/track_detailed_enddate_tv"
-            app:layout_constraintTop_toBottomOf="@+id/track_detailed_enddate_tv" />
 
         <TextView
             android:id="@+id/track_detailed_distance_label"
@@ -109,15 +65,12 @@
             android:id="@+id/track_detailed_speed_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginTop="16dp"
             android:text="@string/speed"
             android:textColor="@color/matteblack"
             android:textSize="13sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.486"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/track_detailed_starttime_tv"
+            app:layout_constraintStart_toStartOf="@+id/track_detailed_starttime_tv"
             app:layout_constraintTop_toBottomOf="@+id/track_detailed_starttime_tv" />
 
         <TextView
@@ -168,6 +121,22 @@
             app:layout_constraintStart_toStartOf="@+id/track_detailed_duration_label"
             app:layout_constraintTop_toBottomOf="@+id/track_detailed_duration_label" />
 
+        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:map="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/track_detailed_map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="337dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="8dp"
+            map:layout_constraintEnd_toEndOf="parent"
+            map:layout_constraintStart_toStartOf="parent"
+            map:layout_constraintTop_toBottomOf="@+id/track_detailed_duration_tv"
+            tools:context=".Activities.MapsActivity" />
 
     </android.support.constraint.ConstraintLayout>
 </ScrollView>

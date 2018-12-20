@@ -16,11 +16,8 @@ public class Track{
     private final String TAG = "Track";
 
     private String name;
-    private LatLng startLatLng;
     private String startDate;
     private String startTime;
-
-    private LatLng endLatLng;
     private String endDate;
     private String endTime;
 
@@ -53,7 +50,6 @@ public class Track{
         //if this is the first latlng
         if(latlngs.size()==0){
             prevLatLng = currentLatLng;
-            startLatLng = currentLatLng;
         }else{
             prevLatLng = latlngs.get(latlngs.size()-1);
         }
@@ -79,8 +75,6 @@ public class Track{
         endTime = Util.getFormattedTimeFromDate(endNow.getTime());
 
         duration = endNow.getTime().getTime() - startNow.getTime().getTime();
-
-        endLatLng = latlngs.get(latlngs.size()-1);
     }
 
     public String getName() {
@@ -111,20 +105,16 @@ public class Track{
         return duration;
     }
 
-    public LatLng getStartLatLng() {
-        return startLatLng;
-    }
-
-    public LatLng getEndLatLng() {
-        return endLatLng;
-    }
-
     public List<LatLng> getLatLngs() {
         return latlngs;
     }
 
     public double getSpeed(){
-        return distance/duration;
+        if(duration!=0){
+            return distance/duration;
+        }else{
+            return -1;
+        }
     }
 
     public Calendar getStartNow() {

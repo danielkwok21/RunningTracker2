@@ -17,24 +17,106 @@
             android:id="@+id/track_detailed_start_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="@string/startAt"
-            app:layout_constraintBottom_toTopOf="@+id/track_detailed_startdate_tv"
+            android:layout_marginTop="8dp"
+            android:text="@string/start_sentence"
             app:layout_constraintEnd_toEndOf="@+id/track_detailed_startdate_tv"
-            app:layout_constraintStart_toStartOf="@+id/track_detailed_startdate_tv" />
+            app:layout_constraintStart_toStartOf="@+id/track_detailed_startdate_tv"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/track_detailed_startdate_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="35dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:text="StartDate"
             android:textSize="30dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/track_detailed_map"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/track_detailed_start_label" />
+
+        <TextView
+            android:id="@+id/track_detailed_starttime_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="StartTime"
+            app:layout_constraintEnd_toEndOf="@+id/track_detailed_startdate_tv"
+            app:layout_constraintStart_toStartOf="@+id/track_detailed_startdate_tv"
+            app:layout_constraintTop_toBottomOf="@+id/track_detailed_startdate_tv" />
+
+
+        <TextView
+            android:id="@+id/track_detailed_distance_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="@string/distance"
+            android:textColor="@color/matteblack"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toTopOf="@+id/track_detailed_distance_tv"
+            app:layout_constraintEnd_toEndOf="@+id/track_detailed_distance_tv"
+            app:layout_constraintStart_toStartOf="@+id/track_detailed_distance_tv" />
+
+        <TextView
+            android:id="@+id/track_detailed_speed_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/speed"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/matteblack"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toTopOf="@+id/track_detailed_speed_tv"
+            app:layout_constraintEnd_toEndOf="@+id/track_detailed_speed_tv"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/track_detailed_speed_tv" />
+
+        <TextView
+            android:id="@+id/track_detailed_duration_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/duration"
+            android:textColor="@color/matteblack"
+            android:textSize="13sp"
+            app:layout_constraintEnd_toEndOf="@+id/track_detailed_speed_tv"
+            app:layout_constraintStart_toStartOf="@+id/track_detailed_speed_tv"
+            app:layout_constraintTop_toBottomOf="@+id/track_detailed_speed_tv" />
+
+        <TextView
+            android:id="@+id/track_detailed_distance_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="distance"
+            app:layout_constraintBottom_toTopOf="@+id/track_detailed_speed_label"
+            app:layout_constraintEnd_toEndOf="@+id/track_detailed_speed_label"
+            app:layout_constraintStart_toStartOf="@+id/track_detailed_speed_label" />
+
+        <TextView
+            android:id="@+id/track_detailed_speed_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="speed"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/track_detailed_map"
+            app:layout_constraintTop_toBottomOf="@+id/track_detailed_starttime_tv"
+            app:layout_constraintVertical_bias="0.54" />
+
+        <TextView
+            android:id="@+id/track_detailed_duration_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="duration"
+            app:layout_constraintEnd_toEndOf="@+id/track_detailed_duration_label"
+            app:layout_constraintStart_toStartOf="@+id/track_detailed_duration_label"
+            app:layout_constraintTop_toBottomOf="@+id/track_detailed_duration_label" />
 
         <fragment xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:map="http://schemas.android.com/apk/res-auto"
@@ -55,81 +137,6 @@
             map:layout_constraintStart_toStartOf="parent"
             map:layout_constraintTop_toTopOf="parent"
             tools:context=".Activities.MapsActivity" />
-
-        <TextView
-            android:id="@+id/track_detailed_end_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="@string/endAt"
-            app:layout_constraintBottom_toTopOf="@+id/track_detailed_enddate_tv"
-            app:layout_constraintEnd_toEndOf="@+id/track_detailed_enddate_tv"
-            app:layout_constraintStart_toStartOf="@+id/track_detailed_enddate_tv" />
-
-        <TextView
-            android:id="@+id/track_detailed_enddate_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="56dp"
-            android:layout_marginEnd="8dp"
-            android:text="EndDate"
-            android:textSize="30dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/track_detailed_map"
-            app:layout_constraintTop_toBottomOf="@+id/track_detailed_startdate_tv" />
-
-        <TextView
-            android:id="@+id/track_detailed_starttime_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="StartTime"
-            app:layout_constraintEnd_toEndOf="@+id/track_detailed_startdate_tv"
-            app:layout_constraintStart_toStartOf="@+id/track_detailed_startdate_tv"
-            app:layout_constraintTop_toBottomOf="@+id/track_detailed_startdate_tv" />
-
-        <TextView
-            android:id="@+id/track_detailed_endtime_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="EndTime"
-            app:layout_constraintEnd_toEndOf="@+id/track_detailed_enddate_tv"
-            app:layout_constraintStart_toStartOf="@+id/track_detailed_enddate_tv"
-            app:layout_constraintTop_toBottomOf="@+id/track_detailed_enddate_tv" />
-
-        <TextView
-            android:id="@+id/track_detailed_distance_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="28dp"
-            android:layout_marginEnd="8dp"
-            android:text="distance"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/track_detailed_map"
-            app:layout_constraintTop_toBottomOf="@+id/track_detailed_endtime_tv" />
-
-        <TextView
-            android:id="@+id/track_detailed_speed_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="speed"
-            app:layout_constraintEnd_toEndOf="@+id/track_detailed_distance_tv"
-            app:layout_constraintStart_toStartOf="@+id/track_detailed_distance_tv"
-            app:layout_constraintTop_toBottomOf="@+id/track_detailed_distance_tv" />
-
-        <TextView
-            android:id="@+id/track_detailed_duration_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="duration"
-            app:layout_constraintEnd_toEndOf="@+id/track_detailed_speed_tv"
-            app:layout_constraintStart_toStartOf="@+id/track_detailed_speed_tv"
-            app:layout_constraintTop_toBottomOf="@+id/track_detailed_speed_tv" />
 
     </android.support.constraint.ConstraintLayout>
 

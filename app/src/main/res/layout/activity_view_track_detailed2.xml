@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <ScrollView xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
@@ -16,43 +17,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:text="@string/startAt"
+        android:text="@string/start_sentence"
         app:layout_constraintBottom_toTopOf="@+id/track_detailed_startdate_tv"
         app:layout_constraintEnd_toEndOf="@+id/track_detailed_startdate_tv"
         app:layout_constraintStart_toStartOf="@+id/track_detailed_startdate_tv" />
 
-    <TextView
-        android:id="@+id/track_detailed_startdate_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="60dp"
-        android:layout_marginTop="32dp"
-        android:text="StartDate"
-        android:textSize="30dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/track_detailed_startdate_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginEnd="8dp"
+            android:text="StartDate"
+            android:textSize="30dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/track_detailed_end_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="@string/endAt"
-        app:layout_constraintBottom_toTopOf="@+id/track_detailed_enddate_tv"
-        app:layout_constraintEnd_toEndOf="@+id/track_detailed_enddate_tv"
-        app:layout_constraintStart_toStartOf="@+id/track_detailed_enddate_tv" />
-
-    <TextView
-        android:id="@+id/track_detailed_enddate_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="60dp"
-        android:text="EndDate"
-        android:textSize="30dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/track_detailed_startdate_tv" />
-
-    <TextView
+        <TextView
         android:id="@+id/track_detailed_starttime_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -62,29 +45,18 @@
         app:layout_constraintStart_toStartOf="@+id/track_detailed_startdate_tv"
         app:layout_constraintTop_toBottomOf="@+id/track_detailed_startdate_tv" />
 
-    <TextView
-        android:id="@+id/track_detailed_endtime_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="EndTime"
-        app:layout_constraintEnd_toEndOf="@+id/track_detailed_enddate_tv"
-        app:layout_constraintStart_toStartOf="@+id/track_detailed_enddate_tv"
-        app:layout_constraintTop_toBottomOf="@+id/track_detailed_enddate_tv" />
-
-    <TextView
-        android:id="@+id/track_detailed_distance_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="68dp"
-        android:layout_marginEnd="8dp"
-        android:text="distance"
-        android:textSize="60dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.503"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/track_detailed_endtime_tv" />
+        <TextView
+            android:id="@+id/track_detailed_distance_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="distance"
+            android:textSize="60dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.503"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_editor_absoluteY="168dp" />
 
 
     <TextView

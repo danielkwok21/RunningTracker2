@@ -172,7 +172,6 @@ public class AndroidLocationService extends Service{
         PendingIntent pendingIntent = stackBuilder
                 .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
-
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
 

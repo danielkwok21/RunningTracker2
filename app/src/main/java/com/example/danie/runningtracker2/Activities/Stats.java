@@ -76,9 +76,10 @@ public class Stats extends AppCompatActivity  implements OnMapReadyCallback {
         if(bestTrack!=null){
             if(!bestTrack.getLatLngs().isEmpty()){
                 //set starting & endingpoint
-                LatLng start = bestTrack.getStartLatLng();
+                LatLng start = bestTrack.getLatLngs().get(0);
                 mMap.addMarker( new MarkerOptions().position(start));
-                LatLng end = bestTrack.getEndLatLng();
+
+                LatLng end = bestTrack.getLatLngs().get(bestTrack.getLatLngs().size()-1);
                 mMap.addMarker( new MarkerOptions().position(end));
 
                 //setting zoom to fit all markers

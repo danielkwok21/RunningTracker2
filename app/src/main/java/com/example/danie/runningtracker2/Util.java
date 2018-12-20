@@ -38,7 +38,11 @@ public class Util {
     }
 
     public static String getFormattedSpeed(double speed){
-        return String.format("%.3f", speed*=3.6)+"km/h";
+        if(speed!=-1){
+            return String.format("%.3f", speed*=3.6)+"km/h";
+        }else{
+            return "∞ "+"km/h";
+        }
     }
 
     public static String getFormattedTimeFromDate(Date date){

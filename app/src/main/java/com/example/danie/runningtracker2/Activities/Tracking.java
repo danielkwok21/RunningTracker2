@@ -148,6 +148,8 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
 
                 //stop detecting location
                 try{
+                    thisTrack.wrapUp();
+
                     stopService(serviceIntent);
                     isServiceRunning = false;
 
@@ -261,7 +263,6 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                     break;
                 case GET_TIME:
                     String formattedSeconds = intent.getStringExtra(Tracking.THIS_TIME);
-
                     stopWatch.setText(formattedSeconds);
                     break;
                 default:

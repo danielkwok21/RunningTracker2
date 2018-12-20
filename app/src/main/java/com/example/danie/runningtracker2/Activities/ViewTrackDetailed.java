@@ -27,16 +27,14 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
     private static final String TAG = "ViewTrackDetailed";
 
     private TextView startDate;
-    private TextView endDate;
     private TextView startTime;
-    private TextView endTime;
     private TextView distance;
     private TextView duration;
     private TextView speed;
     private GoogleMap mMap;
     private SupportMapFragment mapFragment;
 
-    private Track track;
+    private Track thisTrack;
     private Gson gson;
 
     private boolean googlePlayAvailable;
@@ -61,7 +59,7 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
 
             if(extras!=null){
                 jsonObject = extras.getString(TracksProvider.JSON_OBJECT);
-                track = gson.fromJson(jsonObject, Track.class);
+                thisTrack = gson.fromJson(jsonObject, Track.class);
             }
         }
 
@@ -71,16 +69,17 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        if(!track.getLatLngs().isEmpty()){
+        if(!thisTrack.getLatLngs().isEmpty()){
             //set starting & endingpoint
-            LatLng start = track.getStartLatLng();
+            LatLng start = thisTrack.getLatLngs().get(0);
             mMap.addMarker( new MarkerOptions().position(start));
-            LatLng end = track.getEndLatLng();
+
+            LatLng end = thisTrack.getLatLngs().get(thisTrack.getLatLngs().size()-1);
             mMap.addMarker( new MarkerOptions().position(end));
 
             //setting zoom to fit all markers
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
-            for(LatLng l:track.getLatLngs()){
+            for(LatLng l: thisTrack.getLatLngs()){
                 builder.include(l);
             }
             final int width = getResources().getDisplayMetrics().widthPixels;
@@ -92,7 +91,7 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
             //populating latlngs list to draw route
             Polyline route = mMap.addPolyline(new PolylineOptions()
                     .clickable(true)
-                    .addAll(track.getLatLngs()));
+                    .addAll(thisTrack.getLatLngs()));
 
             route.setEndCap(new RoundCap());
             route.setWidth(10);
@@ -103,21 +102,17 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
 
     private void initComponent(){
         startDate = findViewById(R.id.track_detailed_startdate_tv);
-        endDate = findViewById(R.id.track_detailed_enddate_tv);
         startTime = findViewById(R.id.track_detailed_starttime_tv);
-        endTime = findViewById(R.id.track_detailed_endtime_tv);
         distance = findViewById(R.id.track_detailed_distance_tv);
         duration = findViewById(R.id.track_detailed_duration_tv);
         speed = findViewById(R.id.track_detailed_speed_tv);
 
-        startDate.setText(track.getStartDate());
-        startTime.setText(track.getStartTime());
-        endDate.setText(track.getEndDate());
-        endTime.setText(track.getEndTime());
+        startDate.setText(thisTrack.getStartDate());
+        startTime.setText(thisTrack.getStartTime());
 
-        distance.setText(Util.getFormattedDistance(track.getDistance()));
-        duration.setText(Util.getFormattedDurationFromMils(track.getDuration()));
-        speed.setText(Util.getFormattedSpeed(track.getSpeed()));
+        distance.setText(Util.getFormattedDistance(thisTrack.getDistance()));
+        duration.setText(Util.getFormattedDurationFromMils(thisTrack.getDuration()));
+        speed.setText(Util.getFormattedSpeed(thisTrack.getSpeed()));
 
         if(googlePlayAvailable) {
             mapFragment = (SupportMapFragment) getSupportFragmentManager()
