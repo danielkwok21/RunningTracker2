@@ -140,7 +140,7 @@ public class Stats extends AppCompatActivity  implements OnMapReadyCallback {
 
         bestTrack = getBestTrack(newTracks);
 
-        bestDate.setText(bestTrack.getStartDate());
+        bestDate.setText(getApplicationContext().getString(R.string.best_track_sentence)+" "+bestTrack.getStartDate()+" "+getApplicationContext().getString(R.string.at)+" "+bestTrack.getStartTime());
         bestDistance.setText(Util.getFormattedDistance(bestTrack.getDistance()));
         bestTime.setText(Util.getFormattedDurationFromMils(bestTrack.getDuration()));
         bestSpeed.setText(Util.getFormattedSpeed(bestTrack.getSpeed()));
