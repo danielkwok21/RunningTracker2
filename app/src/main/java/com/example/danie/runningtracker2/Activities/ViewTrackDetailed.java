@@ -1,9 +1,7 @@
 package com.example.danie.runningtracker2.Activities;
 
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.example.danie.runningtracker2.ContentProviders.TracksProvider;
@@ -108,9 +106,9 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
         endDate = findViewById(R.id.track_detailed_enddate_tv);
         startTime = findViewById(R.id.track_detailed_starttime_tv);
         endTime = findViewById(R.id.track_detailed_endtime_tv);
-        distance = findViewById(R.id.track_detailed_distance);
-        duration = findViewById(R.id.track_detailed_duration);
-        speed = findViewById(R.id.track_detailed_speed);
+        distance = findViewById(R.id.track_detailed_distance_tv);
+        duration = findViewById(R.id.track_detailed_duration_tv);
+        speed = findViewById(R.id.track_detailed_speed_tv);
 
         startDate.setText(track.getStartDate());
         startTime.setText(track.getStartTime());

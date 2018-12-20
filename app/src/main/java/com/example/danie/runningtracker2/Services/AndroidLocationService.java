@@ -81,7 +81,6 @@ public class AndroidLocationService extends Service{
             }
         };
         stopwatchHandler.post(stopwatchRunnable);
-
     }
 
     @Override
@@ -170,13 +169,11 @@ public class AndroidLocationService extends Service{
         return locationServiceBinder;
     }
 
-
     public class ServiceBinder extends Binder {
         public AndroidLocationService getService(){
             return AndroidLocationService.this;
         }
     }
-
 
     @Override
     public void onDestroy() {

@@ -2,14 +2,11 @@ package com.example.danie.runningtracker2.Activities;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -124,7 +121,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
      */
     private void initComponents() {
         distance = findViewById(R.id.tracking_distance_tv);
-        stopWatch = findViewById(R.id.tracking_duration_chr);
+        stopWatch = findViewById(R.id.tracking_duration_tv);
         start = findViewById(R.id.tracking_start_btn);
 
         if(isGooglePlayAvailable){
