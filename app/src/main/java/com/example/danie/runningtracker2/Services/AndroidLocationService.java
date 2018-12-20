@@ -152,7 +152,7 @@ public class AndroidLocationService extends Service{
 
     private Notification createNotification(String distance){
         Intent intent = new Intent(this, Tracking.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP );
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
