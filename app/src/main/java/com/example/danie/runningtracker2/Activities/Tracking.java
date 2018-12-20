@@ -63,8 +63,8 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     private boolean isGooglePlayAvailable;
 
     private Track newTrack = null;
-    private boolean isServiceBounded;
-    private boolean isReceiverRegisted = false;
+    private boolean isServiceRunning;
+    private boolean isReceiverRegisted;
     private Gson gson = new Gson();
     private String trackJson;
 
@@ -77,20 +77,16 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
         super.onCreate(savedInstanceState);
         locationReceiver = new LocationReceiver();
         filter = new IntentFilter();
-
-        if(!isReceiverRegisted){
-            //registering register when activity created
-            filter.addAction(GET_LOCATION);
-            filter.addAction(GET_TIME);
-            registerReceiver(locationReceiver, filter);
-            isReceiverRegisted = true;
-        }
+        filter.addAction(GET_LOCATION);
+        filter.addAction(GET_TIME);
 
         isGooglePlayAvailable = googlePlayAvailable();
         if(isGooglePlayAvailable){
             setContentView(R.layout.activity_tracking);
+            serviceIntent = new Intent(getApplicationContext(), GooglePlayLocationService.class);
         }else{
             setContentView(R.layout.activity_tracking2);
+            serviceIntent = new Intent(getApplicationContext(), AndroidLocationService.class);
         }
 
         if (!checkPermissions()) {
@@ -99,6 +95,25 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             initComponents();
         }
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(isReceiverRegisted){
+            unregisterReceiver(locationReceiver);
+            isReceiverRegisted = false;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(!isReceiverRegisted){
+            registerReceiver(locationReceiver, filter);
+            isReceiverRegisted = true;
+        }
+    }
+
 
     /**
      * UI components start changing only when a broadcast is received from services
@@ -116,26 +131,15 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
 
         start.setOnClickListener((v)->{
 
-            if (!isServiceBounded) {
-
-                if(!isReceiverRegisted){
-                    registerReceiver(locationReceiver, filter);
-                }
-
-                if(isGooglePlayAvailable){
-                    serviceIntent = new Intent(getApplicationContext(), GooglePlayLocationService.class);
-                }else{
-                    serviceIntent = new Intent(getApplicationContext(), AndroidLocationService.class);
-                }
+            if (!isServiceRunning) {
                 startService(serviceIntent);
-                bindService(serviceIntent, connection, BIND_AUTO_CREATE);
+                isServiceRunning = true;
             } else {
                 try{
                     //stop detecting location
                     newTrack.wrapUp();
-                    unbindService(connection);
                     stopService(serviceIntent);
-                    isServiceBounded = false;
+                    isServiceRunning = false;
 
                     unregisterReceiver(locationReceiver);
                     isReceiverRegisted = false;
@@ -244,7 +248,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                         }else {
                             Log.d(TAG, "onReceive: newTrack is null");
                         }
-                        isServiceBounded = true;
+                        isServiceRunning = true;
                         break;
                     case GET_TIME:
                         String formattedSeconds = intent.getStringExtra(Tracking.THIS_TIME);
@@ -302,22 +306,6 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             }
         }
     }
-//
-//    @Override
-//    protected void onPause() {
-//        super.onPause();
-//        if(isReceiverRegisted){
-//            unregisterReceiver(locationReceiver);
-//        }
-//    }
-//
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//        if(!isReceiverRegisted){
-//            registerReceiver(locationReceiver, filter);
-//        }
-//    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
