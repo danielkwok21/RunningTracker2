@@ -54,7 +54,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="distance"
+            android:text="@string/no_distance"
             android:textSize="20dp"
             app:layout_constraintEnd_toEndOf="@+id/stats_total_distance_label"
             app:layout_constraintStart_toStartOf="@+id/stats_total_distance_label"
@@ -78,7 +78,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="ave_distance"
+            android:text="@string/no_distance"
             android:textSize="20dp"
             app:layout_constraintEnd_toEndOf="@+id/stats_ave_distance_label"
             app:layout_constraintStart_toStartOf="@+id/stats_ave_distance_label"
@@ -118,18 +118,32 @@
             android:layout_marginTop="0dp"
             android:layout_marginEnd="8dp"
             android:text="@string/distance"
-            android:textSize="20dp"
             android:textColor="@color/matteblack"
-            app:layout_constraintEnd_toStartOf="@+id/stats_best_time_label"
+            android:textSize="20dp"
+            app:layout_constraintEnd_toStartOf="@+id/stats_best_speed_label"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/stats_best_time_label" />
+            app:layout_constraintTop_toTopOf="@+id/stats_best_speed_label" />
 
         <TextView
             android:id="@+id/stats_best_time_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="8dp"
             android:text="@string/duration"
+            android:textColor="@color/matteblack"
+            android:textSize="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/stats_best_speed_label"
+            app:layout_constraintTop_toTopOf="@+id/stats_best_speed_label" />
+
+        <TextView
+            android:id="@+id/stats_best_speed_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/speed"
             android:textColor="@color/matteblack"
             android:textSize="20dp"
             app:layout_constraintEnd_toEndOf="@+id/stats_best_track_date_tv"
@@ -137,24 +151,11 @@
             app:layout_constraintTop_toBottomOf="@+id/stats_best_track_date_tv" />
 
         <TextView
-            android:id="@+id/stats_best_speed_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:text="@string/speed"
-            android:textColor="@color/matteblack"
-            android:textSize="20dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/stats_best_time_label"
-            app:layout_constraintTop_toTopOf="@+id/stats_best_time_label" />
-
-        <TextView
             android:id="@+id/stats_best_distance_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="DISTANCE"
+            android:text="@string/no_distance"
             android:textSize="20dp"
             app:layout_constraintEnd_toEndOf="@+id/stats_best_distance_label"
             app:layout_constraintStart_toStartOf="@+id/stats_best_distance_label"
@@ -176,7 +177,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="km/h"
+            android:text="@string/no_speed"
             android:textSize="20dp"
             app:layout_constraintEnd_toEndOf="@+id/stats_best_speed_label"
             app:layout_constraintStart_toStartOf="@+id/stats_best_speed_label"

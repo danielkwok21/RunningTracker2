@@ -53,13 +53,13 @@ public class Stats extends AppCompatActivity  implements OnMapReadyCallback {
 
     private Gson gson = new Gson();
     private Track bestTrack;
-    private boolean googlePlayAvailable;
+    private boolean isGooglePlayAvailable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        googlePlayAvailable = googlePlayAvailable();
-        if(googlePlayAvailable){
+        isGooglePlayAvailable = googlePlayAvailable();
+        if(isGooglePlayAvailable){
             setContentView(R.layout.activity_stats);
         }else{
             setContentView(R.layout.activity_stats2);
@@ -73,33 +73,34 @@ public class Stats extends AppCompatActivity  implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        if(!bestTrack.getLatLngs().isEmpty()){
-            //set starting & endingpoint
-            LatLng start = bestTrack.getStartLatLng();
-            mMap.addMarker( new MarkerOptions().position(start));
-            LatLng end = bestTrack.getEndLatLng();
-            mMap.addMarker( new MarkerOptions().position(end));
+        if(bestTrack!=null){
+            if(!bestTrack.getLatLngs().isEmpty()){
+                //set starting & endingpoint
+                LatLng start = bestTrack.getStartLatLng();
+                mMap.addMarker( new MarkerOptions().position(start));
+                LatLng end = bestTrack.getEndLatLng();
+                mMap.addMarker( new MarkerOptions().position(end));
 
-            //setting zoom to fit all markers
-            LatLngBounds.Builder builder = new LatLngBounds.Builder();
-            for(LatLng l:bestTrack.getLatLngs()){
-                builder.include(l);
+                //setting zoom to fit all markers
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                for(LatLng l:bestTrack.getLatLngs()){
+                    builder.include(l);
+                }
+                final int width = getResources().getDisplayMetrics().widthPixels;
+                final int height = (int)Math.round(getResources().getDisplayMetrics().heightPixels*0.6);
+                final int padding = (int)(width*0.12);
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), width, height, padding));
+
+                //populating latlngs list to draw route
+                Polyline route = mMap.addPolyline(new PolylineOptions()
+                        .clickable(true)
+                        .addAll(bestTrack.getLatLngs()));
+
+                route.setEndCap(new RoundCap());
+                route.setWidth(10);
+                route.setColor(getResources().getColor(R.color.colorAccent));
+                route.setJointType(JointType.ROUND);
             }
-            final int width = getResources().getDisplayMetrics().widthPixels;
-            final int height = (int)Math.round(getResources().getDisplayMetrics().heightPixels*0.6);
-            final int padding = (int)(width*0.12);
-            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), width, height, padding));
-
-
-            //populating latlngs list to draw route
-            Polyline route = mMap.addPolyline(new PolylineOptions()
-                    .clickable(true)
-                    .addAll(bestTrack.getLatLngs()));
-
-            route.setEndCap(new RoundCap());
-            route.setWidth(10);
-            route.setColor(getResources().getColor(R.color.colorAccent));
-            route.setJointType(JointType.ROUND);
         }
     }
 
@@ -113,7 +114,7 @@ public class Stats extends AppCompatActivity  implements OnMapReadyCallback {
         bestTime = findViewById(R.id.stats_best_time_tv);
         bestSpeed = findViewById(R.id.stats_best_speed_tv);
 
-        if(googlePlayAvailable){
+        if(isGooglePlayAvailable){
             mapFragment = (SupportMapFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.track_detailed_map);
             mapFragment.getMapAsync(this);
@@ -122,13 +123,23 @@ public class Stats extends AppCompatActivity  implements OnMapReadyCallback {
         todayFilter.setOnClickListener((v)->{
             todayFilter.setEnabled(false);
             tomonthFilter.setEnabled(true);
-            refreshStats(getFilterTracks(getTracksFromProvider(), TODAY));
+            List<Track> filteredTracks = getFilterTracks(getTracksFromProvider(), TODAY);
+            if(!filteredTracks.isEmpty()){
+                refreshStats(filteredTracks);
+            }else{
+                Util.setToast(this, getApplicationContext().getString(R.string.no_track_today));
+            }
         });
 
         tomonthFilter.setOnClickListener((v)->{
             todayFilter.setEnabled(true);
             tomonthFilter.setEnabled(false);
-            refreshStats(getFilterTracks(getTracksFromProvider(), TOMONTH));
+            List<Track> filteredTracks = getFilterTracks(getTracksFromProvider(), TOMONTH);
+            if(!filteredTracks.isEmpty()){
+                refreshStats(filteredTracks);
+            }else{
+                Util.setToast(this, getApplicationContext().getString(R.string.no_track_tomonth));
+            }
         });
 
         todayFilter.performClick();
