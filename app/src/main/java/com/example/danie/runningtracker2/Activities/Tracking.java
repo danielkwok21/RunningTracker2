@@ -68,7 +68,6 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     private Gson gson = new Gson();
     private String trackJson;
 
-
     /**
      * Use either Google API or Android Location services, depending which is available
      */
@@ -96,6 +95,9 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
         }
     }
 
+    /**
+     * Registers receiver whenever activity created, or device rotated
+     */
     @Override
     protected void onPause() {
         super.onPause();
@@ -105,6 +107,9 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
         }
     }
 
+    /**
+     * Unregisters receiver whenever activity created, or device rotated
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -113,7 +118,6 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             isReceiverRegisted = true;
         }
     }
-
 
     /**
      * UI components start changing only when a broadcast is received from services
@@ -132,11 +136,22 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
         start.setOnClickListener((v)->{
 
             if (!isServiceRunning) {
+
+                //start detecting location
                 startService(serviceIntent);
                 isServiceRunning = true;
+
+                //registers receiver whenever user tries to track location again, without exiting activity
+                if(!isReceiverRegisted){
+                    registerReceiver(locationReceiver, filter);
+                    isReceiverRegisted = true;
+                }
+
+                MainActivity.startTracking.setText(R.string.resume_track);
             } else {
+
+                //stop detecting location
                 try{
-                    //stop detecting location
                     newTrack.wrapUp();
                     stopService(serviceIntent);
                     isServiceRunning = false;
@@ -151,6 +166,8 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                     stopWatch.setText(R.string.no_duration);
                     start.setText(R.string.start_tracking);
                     Util.setToast(this, "Good run!");
+
+                    MainActivity.startTracking.setText(R.string.new_track);
                 }catch(Exception e){
                     Log.d(TAG, "initComponents: "+e);
                 }
@@ -185,7 +202,6 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     private void redrawRoute(){
         List<LatLng> LatLngs = newTrack.getLatLngs();
         if (!LatLngs.isEmpty()) {
-
             mMap.clear();
 
             //set starting point
@@ -261,18 +277,6 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
 
             }
         }
-
-    ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Util.setToast(getApplicationContext(), "Service disconnected abruptly!");
-        }
-    };
 
     /**
      * Check if permission is available

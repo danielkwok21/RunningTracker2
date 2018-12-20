@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Running Tracker</string>
     <string name="new_track">New Tracking</string>
+    <string name="resume_track">Resume Tracking</string>
     <string name="view_tracks">View tracks</string>
     <string name="no_distance">0.000m</string>
     <string name="no_duration">00:00:00</string>
