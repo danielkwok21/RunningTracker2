@@ -60,7 +60,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
 
     private boolean isGooglePlayAvailable;
 
-    private Track newTrack = null;
+    private Track thisTrack = null;
     private boolean isServiceRunning;
     private boolean isReceiverRegistered;
     private Gson gson = new Gson();
@@ -154,7 +154,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                     unregisterReceiver(locationReceiver);
                     isReceiverRegistered = false;
 
-                    uploadToDB(newTrack);
+                    uploadToDB(thisTrack);
 
                     //reset UI
                     distance.setText(R.string.no_distance);
@@ -193,7 +193,7 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
      * updates MAP fragment whenever new location is found
      */
     private void redrawRoute(){
-        List<LatLng> LatLngs = newTrack.getLatLngs();
+        List<LatLng> LatLngs = thisTrack.getLatLngs();
         if (!LatLngs.isEmpty()) {
             mMap.clear();
 
@@ -246,16 +246,16 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
                 case GET_LOCATION:
                     trackJson = intent.getStringExtra(Tracking.THIS_TRACK);
                     if(trackJson!=null) {
-                        newTrack = gson.fromJson(trackJson, Track.class);
+                        thisTrack = gson.fromJson(trackJson, Track.class);
 
                         start.setText(R.string.stop);
-                        distance.setText(Util.getFormattedDistance(newTrack.getDistance()));
+                        distance.setText(Util.getFormattedDistance(thisTrack.getDistance()));
 
                         if(isGooglePlayAvailable) {
                             redrawRoute();
                         }
                     }else {
-                        Log.d(TAG, "onReceive: newTrack is null");
+                        Log.d(TAG, "onReceive: thisTrack is null");
                     }
                     isServiceRunning = true;
                     break;
@@ -314,11 +314,11 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         String trackJson = savedInstanceState.getString(THIS_TRACK);
-        newTrack = gson.fromJson(trackJson, Track.class);
+        thisTrack = gson.fromJson(trackJson, Track.class);
 
-        if(newTrack!=null){
+        if(thisTrack !=null){
             start.setText(R.string.stop);
-            distance.setText(Util.getFormattedDistance(newTrack.getDistance()));
+            distance.setText(Util.getFormattedDistance(thisTrack.getDistance()));
         }
     }
 }

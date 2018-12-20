@@ -5,6 +5,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -42,7 +43,7 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
     private LocationRequest locationRequest;
     private GoogleApiClient googleApiClient;
 
-    private Track newTrack;
+    private Track thisTrack;
     private Handler stopwatchHandler;
     private Runnable stopwatchRunnable;
     private int seconds=0;
@@ -61,7 +62,7 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
                 .addOnConnectionFailedListener(this)
                 .build();
 
-        newTrack = new Track();
+        thisTrack = new Track();
     }
 
     /**
@@ -108,7 +109,7 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
     public void onDestroy() {
         Log.d(TAG, "onDestroy: ");
         super.onDestroy();
-        newTrack.wrapUp();
+        thisTrack.wrapUp();
 
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction(Tracking.SERVICE_ENDED);
@@ -125,8 +126,10 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
 
     private Notification createNotification(String distance){
         Intent intent = new Intent(this, Tracking.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addNextIntentWithParentStack(intent);
+        PendingIntent pendingIntent = stackBuilder
+                .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
@@ -184,15 +187,15 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
         if(location!=null){
             Log.d(TAG, "onLocationChanged: Lat: "+location.getLatitude()+"|Long: "+location.getLongitude());
 
-            newTrack.updateTrack(location);
+            thisTrack.updateTrack(location);
 
             //broadcasts Track object
             broadcastIntent = new Intent();
             broadcastIntent.setAction(Tracking.GET_LOCATION);
-            broadcastIntent.putExtra(Tracking.THIS_TRACK, gson.toJson(newTrack));
+            broadcastIntent.putExtra(Tracking.THIS_TRACK, gson.toJson(thisTrack));
             sendBroadcast(broadcastIntent);
 
-            notificationManager.notify(UNIQUE_ID, createNotification(Util.getFormattedDistance(newTrack.getDistance())));
+            notificationManager.notify(UNIQUE_ID, createNotification(Util.getFormattedDistance(thisTrack.getDistance())));
         }else{
             Log.d(TAG, "onLocationChanged: location is null");
         }
