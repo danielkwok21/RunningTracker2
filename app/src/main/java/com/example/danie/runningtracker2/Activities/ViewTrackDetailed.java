@@ -37,16 +37,16 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
     private Track thisTrack;
     private Gson gson;
 
-    private boolean googlePlayAvailable;
+    private boolean isGooglePlayAvailable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        googlePlayAvailable = googlePlayAvailable();
+        isGooglePlayAvailable = googlePlayAvailable();
 
         super.onCreate(savedInstanceState);
 
-        if(googlePlayAvailable){
+        if(isGooglePlayAvailable){
             setContentView(R.layout.activity_view_track_detailed);
         }else{
             setContentView(R.layout.activity_view_track_detailed2);
@@ -87,7 +87,6 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
             final int padding = (int)(width*0.12);
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), width, height, padding));
 
-
             //populating latlngs list to draw route
             Polyline route = mMap.addPolyline(new PolylineOptions()
                     .clickable(true)
@@ -114,7 +113,7 @@ public class ViewTrackDetailed extends AppCompatActivity implements OnMapReadyCa
         duration.setText(Util.getFormattedDurationFromMils(thisTrack.getDuration()));
         speed.setText(Util.getFormattedSpeed(thisTrack.getSpeed()));
 
-        if(googlePlayAvailable) {
+        if(isGooglePlayAvailable) {
             mapFragment = (SupportMapFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.track_detailed_map);
             mapFragment.getMapAsync(this);

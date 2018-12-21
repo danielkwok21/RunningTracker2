@@ -11,8 +11,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import com.example.danie.runningtracker2.R;
-import com.example.danie.runningtracker2.Track;
-import com.example.danie.runningtracker2.Util;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -24,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ServiceStatusReceiver statusReceiver;
     private IntentFilter filter;
-    private boolean isReceiverRegisted;
+    private boolean isReceiverRegistered;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,15 +60,15 @@ public class MainActivity extends AppCompatActivity {
             startActivity(i);
         });
     }
-
-
+    
     @Override
     protected void onPause() {
         super.onPause();
-        if(isReceiverRegisted){
+        if(isReceiverRegistered){
             unregisterReceiver(statusReceiver);
-            isReceiverRegisted = false;
+            isReceiverRegistered = false;
         }
+        Log.d(TAG, "onPause: ");
     }
 
     /**
@@ -79,12 +77,31 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if(!isReceiverRegisted){
+        if(!isReceiverRegistered){
             registerReceiver(statusReceiver, filter);
-            isReceiverRegisted = true;
+            isReceiverRegistered = true;
         }
+        Log.d(TAG, "onResume: ");
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy: ");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart: ");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop: ");
+    }
+    
     public class ServiceStatusReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {

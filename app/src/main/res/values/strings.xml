@@ -16,6 +16,7 @@
     <string name="start_sentence">This track was ran at</string>
     <string name="endAt">End: </string>
     <string name="best_track_sentence">Your best track was at</string>
+    <string name="no_track_sentence">You seem to have no saved tracks. Create one now?</string>
     <string name="no_track_tomonth">No track this month. Create one now!</string>
     <string name="no_track_today">No track today. Create one now!</string>
     <string name="at">at</string>

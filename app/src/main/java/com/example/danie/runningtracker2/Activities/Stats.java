@@ -129,7 +129,7 @@ public class Stats extends AppCompatActivity  implements OnMapReadyCallback {
         todayFilter.setOnClickListener((v)->{
             todayFilter.setEnabled(false);
             tomonthFilter.setEnabled(true);
-            List<Track> filteredTracks = getFilterTracks(getTracksFromProvider(), TODAY);
+            List<Track> filteredTracks = getFilteredTracks(getTracksFromProvider(), TODAY);
             if(!filteredTracks.isEmpty()){
                 refreshStats(filteredTracks);
             }else{
@@ -140,7 +140,7 @@ public class Stats extends AppCompatActivity  implements OnMapReadyCallback {
         tomonthFilter.setOnClickListener((v)->{
             todayFilter.setEnabled(true);
             tomonthFilter.setEnabled(false);
-            List<Track> filteredTracks = getFilterTracks(getTracksFromProvider(), TOMONTH);
+            List<Track> filteredTracks = getFilteredTracks(getTracksFromProvider(), TOMONTH);
             if(!filteredTracks.isEmpty()){
                 refreshStats(filteredTracks);
             }else{
@@ -196,7 +196,7 @@ public class Stats extends AppCompatActivity  implements OnMapReadyCallback {
         return tracks;
     }
 
-    private List<Track> getFilterTracks(List<Track> tracks, String filter){
+    private List<Track> getFilteredTracks(List<Track> tracks, String filter){
         List<Track> filteredTracks = new ArrayList<>();
 
         switch(filter){
@@ -215,7 +215,7 @@ public class Stats extends AppCompatActivity  implements OnMapReadyCallback {
                 }
                 break;
             default:
-                Log.d(TAG, "getFilterTracks: Error. Wrong filter");
+                Log.d(TAG, "getFilteredTracks: Error. Wrong filter");
         }
 
         return filteredTracks;

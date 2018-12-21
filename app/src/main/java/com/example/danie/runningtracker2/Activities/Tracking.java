@@ -49,8 +49,6 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
     private Intent serviceIntent;
     private IntentFilter filter;
     private LocationReceiver locationReceiver;
-    private GooglePlayLocationService googlePlayLocationService;
-    private AndroidLocationService androidLocationService;
 
     private TextView distance;
     private TextView stopWatch;
@@ -90,30 +88,6 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             requestPermissions();
         } else {
             initComponents();
-        }
-    }
-
-    /**
-     * Registers receiver whenever activity created, or device rotated
-     */
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if(isReceiverRegistered){
-            unregisterReceiver(locationReceiver);
-            isReceiverRegistered = false;
-        }
-    }
-
-    /**
-     * Unregisters receiver whenever activity created, or device rotated
-     */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(!isReceiverRegistered){
-            registerReceiver(locationReceiver, filter);
-            isReceiverRegistered = true;
         }
     }
 
@@ -324,5 +298,50 @@ public class Tracking extends AppCompatActivity implements OnMapReadyCallback{
             start.setText(R.string.stop);
             distance.setText(Util.getFormattedDistance(thisTrack.getDistance()));
         }
+    }
+
+
+    /**
+     * Registers receiver whenever activity created, or device rotated
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(isReceiverRegistered){
+            unregisterReceiver(locationReceiver);
+            isReceiverRegistered = false;
+        }
+        Log.d(TAG, "onPause: ");
+    }
+
+    /**
+     * Unregisters receiver whenever activity created, or device rotated
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(!isReceiverRegistered){
+            registerReceiver(locationReceiver, filter);
+            isReceiverRegistered = true;
+        }
+        Log.d(TAG, "onResume: ");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy: ");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop: ");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart: ");
     }
 }

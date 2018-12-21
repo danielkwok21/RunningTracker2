@@ -199,7 +199,7 @@
             android:id="@+id/track_detailed_map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
-            android:layout_height="188dp"
+            android:layout_height="300dp"
             android:layout_marginStart="0dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="0dp"

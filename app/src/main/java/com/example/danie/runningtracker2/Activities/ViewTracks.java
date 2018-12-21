@@ -36,13 +36,17 @@ public class ViewTracks extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_view_tracks);
 
         contentResolver = getApplicationContext().getContentResolver();
-
         tracks = getTracksFromProvider();
-        initRecyclerView(tracks);
-        initComponents();
+
+        if(!tracks.isEmpty()){
+            setContentView(R.layout.activity_view_tracks);
+            initRecyclerView(tracks);
+            initComponents();
+        }else{
+            setContentView(R.layout.activity_view_tracks_empty);
+        }
     }
 
     private void initComponents(){
@@ -99,5 +103,35 @@ public class ViewTracks extends AppCompatActivity {
         TracksRecyclerAdapter tracksRecyclerAdapter = new TracksRecyclerAdapter(tracks);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(tracksRecyclerAdapter);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart: ");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop: ");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause: ");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume: ");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy: ");
     }
 }

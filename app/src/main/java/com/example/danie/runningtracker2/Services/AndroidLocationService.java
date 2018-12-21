@@ -39,7 +39,7 @@ public class AndroidLocationService extends Service{
     private LocationManager locationManager;
     private LocationListener locationListener;
 
-    private Track newTrack;
+    private Track thisTrack;
     private Handler stopwatchHandler;
     private Runnable stopwatchRunnable;
     private Intent broadcastIntent;
@@ -51,7 +51,7 @@ public class AndroidLocationService extends Service{
     @Override
     public void onCreate() {
         super.onCreate();
-        newTrack = new Track();
+        thisTrack = new Track();
         startStopwatch();
     }
 
@@ -64,7 +64,7 @@ public class AndroidLocationService extends Service{
     @Override
     public void onDestroy() {
         super.onDestroy();
-        newTrack.wrapUp();
+        thisTrack.wrapUp();
 
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction(Tracking.SERVICE_ENDED);
@@ -132,15 +132,15 @@ public class AndroidLocationService extends Service{
                 if(location!=null){
 
                     Log.d(TAG, "onLocationChanged: Lat: "+location.getLatitude()+"|Long: "+location.getLongitude());
-                    newTrack.updateTrack(location);
+                    thisTrack.updateTrack(location);
 
                     //broadcasts Track object
                     broadcastIntent = new Intent();
                     broadcastIntent.setAction(Tracking.GET_LOCATION);
-                    broadcastIntent.putExtra(Tracking.THIS_TRACK, gson.toJson(newTrack));
+                    broadcastIntent.putExtra(Tracking.THIS_TRACK, gson.toJson(thisTrack));
                     sendBroadcast(broadcastIntent);
 
-                    notificationManager.notify(UNIQUE_ID, createNotification(Util.getFormattedDistance(newTrack.getDistance())));
+                    notificationManager.notify(UNIQUE_ID, createNotification(Util.getFormattedDistance(thisTrack.getDistance())));
                 }else{
                     Log.d(TAG, "onLocationChanged: location is null");
                 }
@@ -172,7 +172,7 @@ public class AndroidLocationService extends Service{
         if(location!=null){
             locationListener.onLocationChanged(location);
         }else{
-            Util.setToast(this, "Cannot detect current location");
+            Util.setToast(this, "Cannot detect current location. Try moving around?");
         }
     }
 

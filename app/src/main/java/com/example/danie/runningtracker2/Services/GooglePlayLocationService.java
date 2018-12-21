@@ -160,7 +160,7 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
         if(location!=null){
             onLocationChanged(location);
         }else{
-            Util.setToast(this, "Cannot detect current location");
+            Util.setToast(this, "Cannot detect current location. Try moving around?");
         }
 
         locationRequest = new LocationRequest();
@@ -215,5 +215,17 @@ public class GooglePlayLocationService extends Service implements GoogleApiClien
         public GooglePlayLocationService getService(){
             return GooglePlayLocationService.this;
         }
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.d(TAG, "onUnbind: ");
+        return super.onUnbind(intent);
+    }
+
+    @Override
+    public void onRebind(Intent intent) {
+        super.onRebind(intent);
+        Log.d(TAG, "onRebind: ");
     }
 }
